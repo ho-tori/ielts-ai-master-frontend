@@ -15,3 +15,16 @@ export interface LoginResponse {
 	user: User
 }
 
+export interface UserStats {
+	totalArticles: number
+	totalVocabulary: number
+	streakDays: number
+	completedReadings?: number
+	masteredVocab?: number
+}
+
+export interface UserProfile extends User {
+	stats?: UserStats
+	badges?: string[]
+}
+
