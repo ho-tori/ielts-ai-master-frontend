@@ -1,3 +1,4 @@
+```java
 src/
 ├─ main.ts                  # 应用入口
 ├─ App.vue                  # 根组件（只放 layout / router-view）
@@ -72,3 +73,5 @@ src/
 │  ├─ storage.ts            # localStorage / token
 │  ├─ format.ts             # 文本 / 时间格式
 │  └─ debounce.ts
+```
+
