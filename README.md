@@ -28,9 +28,8 @@ src/
 ├─ layouts/                 # 页面布局（不含业务）
 │  ├─ DefaultLayout.vue
 │  ├─ AuthLayout.vue
-│  └─ components/
-│      ├─ Header.vue
-│      └─ Sidebar.vue
+│  ├─ Header.vue
+│  └─ Sidebar.vue
 
 ├─ components/              # 通用可复用组件（跨页面）
 │  ├─ common/
@@ -55,10 +54,20 @@ src/
 │  ├─ dashboard/
 │  │   └─ DashboardView.vue
 │  │
+│  ├─ account/
+│  │   └─ AccountView.vue
+│  │
+│  ├─ practice/              # 练习中心 ⭐
+│  │   ├─ PracticeView.vue
+│  │   └─ components/
+│  │       ├─ SearchBar.vue
+│  │       ├─ ExerciseCard.vue
+│  │       └─ EmptyState.vue
+│  │
 │  └─ reading/              # 阅读模块 ⭐⭐⭐
 │      ├─ ReadingView.vue   # 页面调度（请求 + 状态）
 │      └─ components/
-│          ├─ ArticleText.vue
+│          ├─ ArticleSection.vue
 │          ├─ SentenceItem.vue
 │          ├─ QuestionPanel.vue
 │          └─ AiResultPanel.vue
