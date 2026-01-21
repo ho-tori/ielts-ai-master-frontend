@@ -9,26 +9,26 @@
           <span class="text-indigo-600">{{ idx + 1 }}.</span> {{ q.questionText }}
         </p>
         <div class="space-y-2">
-          <button
+          <BaseButton
             v-if="q.type === 'TRUE_FALSE_NOT_GIVEN'"
             v-for="opt in ['TRUE/YES', 'FALSE/NO', 'NOT GIVEN']"
             :key="`${q.id}-tfn-${opt}`"
-            class="block w-full text-left p-3 rounded-lg border-2 font-medium transition-all cursor-pointer hover:bg-indigo-50"
-            :class="selectedAnswers[q.id] === opt ? 'border-indigo-600 bg-indigo-50' : 'border-slate-200'"
+            :variant="selectedAnswers[q.id] === opt ? 'tertiary' : 'secondary'"
+            block
             @click="selectAnswer(q.id, opt)"
           >
             {{ opt }}
-          </button>
-          <button
+          </BaseButton>
+          <BaseButton
             v-else
             v-for="opt in q.options"
             :key="`${q.id}-mc-${opt}`"
-            class="block w-full text-left p-3 rounded-lg border-2 font-medium transition-all cursor-pointer hover:bg-indigo-50"
-            :class="selectedAnswers[q.id] === opt ? 'border-indigo-600 bg-indigo-50' : 'border-slate-200'"
+            :variant="selectedAnswers[q.id] === opt ? 'tertiary' : 'secondary'"
+            block
             @click="selectAnswer(q.id, opt)"
           >
             {{ opt }}
-          </button>
+          </BaseButton>
         </div>
       </div>
     </div>
@@ -47,8 +47,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import type { Question } from '../../../types/article'
-import BaseCard from '../../../components/common/BaseCard.vue'
-import BaseButton from '../../../components/common/BaseButton.vue'
+import { BaseCard, BaseButton } from '@/components'
 
 const props = defineProps<{
   questions: Question[]

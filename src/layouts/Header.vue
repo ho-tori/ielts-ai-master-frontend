@@ -15,9 +15,9 @@
         <Icon icon="heroicons:fire-solid" class="text-amber-500" />
         <span class="text-sm font-bold">12 Days</span>
       </div>
-      <button class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors" @click="goAccount" title="个人信息">
+      <BaseButton variant="ghost" size="sm" @click="goAccount" title="个人信息">
         <Icon icon="heroicons:cog-6-tooth" class="text-slate-600 text-xl" />
-      </button>
+      </BaseButton>
     </div>
   </header>
 </template>
@@ -25,6 +25,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
+import { BaseButton } from '@/components'
 
 const router = useRouter()
 

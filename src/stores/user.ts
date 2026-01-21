@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { apiLogin, apiProfile } from '../api/user'
+import { authenticateUser, generateLoginResponse } from '../data/user'
 import type { User, LoginPayload } from '../types/user'
 import { getToken, setToken, clearAuth, getUser, setUser } from '../utils/storage'
 
@@ -15,7 +16,7 @@ interface State {
 export const useUserStore = defineStore('user', {
 	state: (): State => ({
 		token: getToken(),
-		user: getUser<User>() ,
+		user: getUser<User>(),
 		loading: false,
 		error: null
 	}),
@@ -25,20 +26,21 @@ export const useUserStore = defineStore('user', {
 			this.error = null
 			try {
 				if (isMockAuthEnabled) {
-					// 本地模拟：无论什么邮箱/密码均登录成功
-					const mock = {
-						token: 'dev-token-' + Date.now(),
-						user: {
-							id: 'u_' + Math.random().toString(36).slice(2, 10),
-							name: (payload.email || '用户').split('@')[0] || '用户',
-							email: payload.email || 'user@example.com',
-							avatar: ''
-						} as User
+					// 使用测试用户数据进行认证
+					const userAuth = authenticateUser(payload.email, payload.password)
+					
+					if (!userAuth) {
+						this.error = '邮箱或密码错误'
+						return false
 					}
-					setToken(mock.token)
-					setUser(mock.user)
-					this.token = mock.token
-					this.user = mock.user
+					
+					const loginResponse = generateLoginResponse(userAuth)
+					setToken(loginResponse.token)
+					setUser(loginResponse.user)
+					this.token = loginResponse.token
+					this.user = loginResponse.user
+					
+					console.log(`✅ 用户 ${loginResponse.user.name} 登录成功`)
 					return true
 				} else {
 					const { data } = await apiLogin(payload)
@@ -56,6 +58,7 @@ export const useUserStore = defineStore('user', {
 				this.loading = false
 			}
 		},
+
 		async fetchProfile() {
 			if (!this.token) return
 			if (isMockAuthEnabled) {
@@ -70,12 +73,58 @@ export const useUserStore = defineStore('user', {
 					this.user = data.data
 					setUser(data.data)
 				}
-			} catch { /* ignore */ }
+			} catch {
+				/* ignore */
+			}
 		},
+
 		logout() {
 			clearAuth()
 			this.token = null
 			this.user = null
+		},
+
+		/**
+		 * 添加文章到用户最近阅读列表
+		 * @param articleId 文章ID
+		 */
+		addRecentArticle(articleId: number) {
+			if (!this.user) {
+				console.warn('❌ 用户未登录，无法添加最近阅读')
+				return
+			}
+
+			console.log('🔍 开始处理最近阅读 - 文章ID:', articleId)
+			console.log('📋 当前用户:', this.user.name, '现有最近阅读:', this.user.recentArticles)
+
+			// 初始化 recentArticles 数组
+			if (!this.user.recentArticles) {
+				this.user.recentArticles = []
+			}
+
+			// 如果文章已在列表中，移到最前面（移除原位置）
+			const index = this.user.recentArticles.indexOf(articleId)
+			if (index > -1) {
+				this.user.recentArticles.splice(index, 1)
+				console.log('♻️ 文章已存在，从位置', index, '移除')
+			}
+
+			// 将文章ID添加到最前面
+			this.user.recentArticles.unshift(articleId)
+			console.log('✅ 文章添加到最前面，当前列表:', this.user.recentArticles)
+
+			// 只保留最多 10 个最近阅读文章
+			if (this.user.recentArticles.length > 10) {
+				const removed = this.user.recentArticles.pop()
+				console.log('🗑️ 超过10个限制，移除最后的:', removed)
+			}
+
+			// 同步到本地存储 - 关键！必须创建新对象以触发响应式
+			const updatedUser = { ...this.user }
+			setUser(updatedUser)
+			this.user = updatedUser
+			
+			console.log('📚 ✨ 文章成功添加到最近阅读:', this.user.recentArticles)
 		}
 	}
 })

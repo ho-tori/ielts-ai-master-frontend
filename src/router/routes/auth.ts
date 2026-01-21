@@ -1,5 +1,4 @@
 import AuthLayout from '../../layouts/AuthLayout.vue'
-import LoginView from '../../views/login/LoginView.vue'
 
 export default [
 	{
@@ -9,7 +8,7 @@ export default [
 			{
 				path: '',
 				name: 'Login',
-				component: LoginView
+				component: () => import('../../views/login/LoginView.vue')
 			}
 		]
 	}

@@ -1,9 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import DefaultLayout from '../layouts/DefaultLayout.vue'
-import ReadingView from '../views/reading/ReadingView.vue'
-import AccountView from '../views/account/AccountView.vue'
-import DashboardView from '../views/dashboard/DashboardView.vue'
-import PracticeView from '../views/practice/PracticeView.vue'
 import authRoutes from './routes/auth'
 import { getToken } from '../utils/storage'
 
@@ -18,28 +14,34 @@ const router = createRouter({
         {
           path: '',
           name: 'Dashboard',
-          component: DashboardView,
+          component: () => import('../views/dashboard/DashboardView.vue'),
           meta: { requiresAuth: true }
         },
         {
           path: 'reading',
           name: 'Reading',
-          component: ReadingView,
+          component: () => import('../views/reading/ReadingView.vue'),
           meta: { requiresAuth: true }
         },
         {
           path: 'practice',
           name: 'Practice',
-          component: PracticeView,
+          component: () => import('../views/practice/PracticeView.vue'),
           meta: { requiresAuth: true }
         },
         {
           path: 'account',
           name: 'Account',
-          component: AccountView,
+          component: () => import('../views/account/AccountView.vue'),
           meta: { requiresAuth: true }
         }
       ]
+    },
+    // 404 页面 - 需要放在最后
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: () => import('../views/notfound/NotFoundView.vue')
     }
   ]
 })

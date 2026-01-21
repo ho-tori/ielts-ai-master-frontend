@@ -1,7 +1,7 @@
 <template>
 	<button
 		:type="type"
-	class="inline-flex items-center justify-center rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
+	class="inline-flex items-center justify-center rounded-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed"
 		:class="classes"
 		:disabled="disabled || loading"
 		@click="$emit('click')"
@@ -15,7 +15,7 @@
 import { computed } from 'vue'
 
 interface Props {
-	variant?: 'primary' | 'secondary' | 'ghost'
+	variant?: 'primary' | 'secondary' | 'tertiary' | 'ghost'
 	size?: 'sm' | 'md' | 'lg'
 	block?: boolean
 	loading?: boolean
@@ -48,11 +48,13 @@ const sizeClass = computed(() => {
 const variantClass = computed(() => {
 	switch (props.variant) {
 		case 'secondary':
-			return 'bg-slate-100 text-slate-700 hover:bg-slate-200 focus:ring-slate-300 font-medium'
+			return 'bg-slate-100 text-slate-700 hover:bg-slate-200  font-medium'
+		case 'tertiary':
+			return 'bg-indigo-200 text-slate-700 hover:bg-indigo-300 font-medium '
 		case 'ghost':
-			return 'bg-transparent text-slate-700 hover:bg-slate-100 focus:ring-slate-300 font-medium'
+			return 'bg-transparent text-slate-700 hover:bg-slate-100 font-medium'
 		default:
-			return 'bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-300 font-semibold'
+			return 'bg-indigo-600 text-white hover:bg-indigo-700 font-semibold'
 	}
 })
 

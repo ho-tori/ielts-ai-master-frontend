@@ -41,7 +41,7 @@
       <div class="space-y-2">
         <router-link
           v-for="article in recentArticles"
-          :key="article.id"
+          :key="String(article.id)"
           to="/reading"
           class="block p-3 rounded-lg hover:bg-slate-50 transition-colors border border-slate-100"
         >
@@ -54,16 +54,38 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import BaseCard from '../../components/common/BaseCard.vue'
+import { computed } from 'vue'
+import { useUserStore } from '@/stores/user'
+import { mockArticles } from '@/data/article'
+import { BaseCard } from '@/components'
 
-const totalArticles = ref(12)
-const totalVocab = ref(2480)
-const streakDays = ref(42)
+const userStore = useUserStore()
 
-const recentArticles = ref([
-  { id: '1', title: 'The Impact of Artificial Intelligence on Marine Biology', category: 'Science' },
-  { id: '2', title: 'Sustainable Tourism in Developing Countries', category: 'Society' },
-  { id: '3', title: 'The Evolution of Human Communication', category: 'Culture' }
-])
+// 计算已完成的文章数
+const totalArticles = computed(() => {
+  return userStore.user?.recentArticles?.length || 0
+})
+
+// 计算掌握的词汇（基于阅读过的文章中的单词）
+const totalVocab = computed(() => {
+  if (!userStore.user?.recentArticles) return 0
+  return userStore.user.recentArticles.reduce((total, articleId) => {
+    const article = mockArticles.find(a => a.id === articleId)
+    return total + (article?.wordCount || 0)
+  }, 0)
+})
+
+// 连续学习天数（示例值）
+const streakDays = computed(() => {
+  return userStore.user?.recentArticles?.length ? 7 : 0
+})
+
+// 最近阅读的文章列表
+const recentArticles = computed(() => {
+  if (!userStore.user?.recentArticles) return []
+  return userStore.user.recentArticles
+    .map(articleId => mockArticles.find(a => a.id === articleId))
+    .filter(article => article !== undefined)
+    .slice(0, 5) // 最多显示5个
+})
 </script>

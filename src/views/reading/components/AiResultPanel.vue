@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { BaseButton } from '@/components'
 
 const props = defineProps<{
   selection: {
@@ -66,13 +67,14 @@ watch(
         </p>
       </div>
 
-      <button
-        class="py-2 bg-indigo-600 text-white rounded-lg text-sm disabled:opacity-50"
+      <BaseButton
+        variant="primary"
+        block
         :disabled="loading"
         @click="askAI"
       >
         {{ loading ? 'AI 分析中...' : '询问 AI 助教' }}
-      </button>
+      </BaseButton>
 
       <!-- AI 返回结果 -->
       <div v-if="result" class="mt-2 space-y-4">

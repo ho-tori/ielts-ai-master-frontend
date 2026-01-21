@@ -53,7 +53,7 @@
     <!-- Settings -->
     <BaseCard>
       <div class="divide-y divide-slate-100">
-        <button class="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors">
+        <button class="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors" @click="showEditProfile = true">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
               <Icon icon="solar:user-circle-linear" class="text-blue-500 text-xl" />
@@ -79,7 +79,7 @@
             <div class="w-3 h-3 bg-white rounded-full absolute right-1"></div>
           </div>
         </button>
-        <button class="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors">
+        <button class="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors" @click="showAccountSecurity = true">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
               <Icon icon="solar:shield-keyhole-linear" class="text-purple-500 text-xl" />
@@ -98,6 +98,20 @@
         </BaseButton>
       </div>
     </BaseCard>
+
+    <!-- Edit Profile Dialog -->
+    <EditProfileDialog 
+      v-model="showEditProfile" 
+      :initialName="user?.name || ''"
+      :initialTarget="user?.target || ''"
+      @save="handleSaveProfile"
+    />
+
+    <!-- Account Security Dialog -->
+    <AccountSecurityDialog 
+      v-model="showAccountSecurity"
+      @save="handleSaveSecurity"
+    />
   </div>
 </template>
 
@@ -105,8 +119,9 @@
 import { computed, onMounted, onBeforeUnmount, ref } from 'vue'
 import { useUserStore } from '../../stores/user'
 import { useRouter } from 'vue-router'
-import BaseCard from '../../components/common/BaseCard.vue'
-import BaseButton from '../../components/common/BaseButton.vue'
+import { BaseCard, BaseButton } from '@/components'
+import EditProfileDialog from './components/EditProfileDialog.vue'
+import AccountSecurityDialog from './components/AccountSecurityDialog.vue'
 import { Icon } from '@iconify/vue'
 import * as echarts from 'echarts'
 
@@ -114,9 +129,24 @@ const router = useRouter()
 const userStore = useUserStore()
 const user = computed(() => userStore.user)
 
+const showEditProfile = ref(false)
+const showAccountSecurity = ref(false)
+
 const initials = computed(() => (user.value?.name || '用户').slice(0, 1).toUpperCase())
 const updateText = computed(() => new Date().toISOString().slice(0, 10).replace(/-/g, '.'))
 
+
+function handleSaveProfile(data: { name: string; target: string }) {
+  // 调用接口保存资料
+  console.log('保存资料:', data)
+  // 可在这里添加 API 调用更新用户信息
+}
+
+function handleSaveSecurity(data: { phone: string; password: string }) {
+  // 调用接口保存安全设置
+  console.log('保存安全设置:', data)
+  // 可在这里添加 API 调用更新用户手机和密码
+}
 const chartEl = ref<HTMLDivElement | null>(null)
 let chart: echarts.ECharts | null = null
 

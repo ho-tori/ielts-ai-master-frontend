@@ -2,7 +2,8 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
-import './assets/main.css' // 必须引入 CSS
+import './assets/main.css'
+import './styles/globals.css'
 
 const app = createApp(App)
 app.use(createPinia())
