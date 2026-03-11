@@ -1,12 +1,18 @@
 <template>
   <BaseCard>
     <form class="space-y-4" @submit.prevent="onSubmit">
-      <!-- 测试用户提示 -->
-      <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-        <p class="text-xs text-blue-800 font-semibold mb-2">📝 测试账户：</p>
-        <p class="text-xs text-blue-700">邮箱: zhangsan@example.com</p>
-        <p class="text-xs text-blue-700">密码: password123</p>
+      <div class="text-center mb-4">
+        <h2 class="text-xl font-bold text-slate-800">{{ isRegister ? '注册账号' : '登录' }}</h2>
       </div>
+
+      <BaseInput
+        v-if="isRegister"
+        v-model="form.name"
+        type="text"
+        label="姓名"
+        placeholder="请输入姓名"
+        required
+      />
 
       <BaseInput
         v-model="form.email"
@@ -39,26 +45,24 @@
         size="lg"
         block
       >
-        {{ loading ? '登录中...' : '登录' }}
+        {{ loading ? (isRegister ? '注册中...' : '登录中...') : (isRegister ? '注册' : '登录') }}
       </BaseButton>
 
-      <!-- 快速登录按钮 -->
-      <div class="grid grid-cols-2 gap-2 pt-2">
+      <div class="text-center">
+        <button type="button" class="text-sm text-blue-600 hover:underline" @click="toggleMode">
+          {{ isRegister ? '已有账号？去登录' : '没有账号？去注册' }}
+        </button>
+      </div>
+
+      <div v-if="!isRegister" class="pt-2">
         <BaseButton
           type="button"
           variant="secondary"
           size="sm"
-          @click="quickLogin('zhangsan@example.com', 'password123')"
+          block
+          @click="quickLogin('AA@example.com', '111111')"
         >
-          用户1 登录
-        </BaseButton>
-        <BaseButton
-          type="button"
-          variant="secondary"
-          size="sm"
-          @click="quickLogin('lisi@example.com', 'password123')"
-        >
-          用户2 登录
+          测试用户
         </BaseButton>
       </div>
     </form>
@@ -71,25 +75,52 @@ import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { BaseCard, BaseButton, BaseInput, ErrorState } from '@/components'
 import { useUserStore } from '../../stores/user'
+import { apiRegister } from '../../api/user'
 
 const showPassword = ref(false)
-const form = reactive({ email: '', password: '' })
+const isRegister = ref(false)
+const form = reactive({ email: '', password: '', name: '' })
 const router = useRouter()
 const userStore = useUserStore()
 const { loading, error } = storeToRefs(userStore)
 
+function toggleMode() {
+  isRegister.value = !isRegister.value
+  userStore.error = null
+}
+
 async function onSubmit() {
   if (!form.email || !form.password) return
-  const ok = await userStore.login({ email: form.email, password: form.password })
-  if (ok) {
-    const redirect = (router.currentRoute.value.query.redirect as string) || '/'
-    router.replace(redirect)
+  
+  if (isRegister.value) {
+    if (!form.name) return
+    try {
+      const { data } = await apiRegister({ 
+        email: form.email, 
+        password: form.password, 
+        name: form.name 
+      })
+      if (data.code === 0) {
+        userStore.token = data.data.token
+        userStore.user = data.data.user
+        localStorage.setItem('ielts_token', data.data.token)
+        const redirect = (router.currentRoute.value.query.redirect as string) || '/'
+        router.replace(redirect)
+      } else {
+        userStore.error = data.message || '注册失败'
+      }
+    } catch (e: any) {
+      userStore.error = e?.response?.data?.message || '注册失败'
+    }
+  } else {
+    const ok = await userStore.login({ email: form.email, password: form.password })
+    if (ok) {
+      const redirect = (router.currentRoute.value.query.redirect as string) || '/'
+      router.replace(redirect)
+    }
   }
 }
 
-/**
- * 快速登录（用于测试）
- */
 function quickLogin(email: string, password: string) {
   form.email = email
   form.password = password

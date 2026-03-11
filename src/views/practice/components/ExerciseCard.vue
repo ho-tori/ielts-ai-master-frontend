@@ -48,8 +48,15 @@
 
       <!-- 右侧操作区 -->
       <div class="flex flex-col items-end space-y-3 ml-4">
-        <span class="px-3 py-1 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-full">
-          {{ exercise.completed ? '已完成' : '未开始' }}
+        <span 
+          :class="[
+            'px-3 py-1 text-[10px] font-bold rounded-full',
+            exercise.completed 
+              ? 'bg-amber-100 text-amber-700' 
+              : 'bg-slate-100 text-slate-500'
+          ]"
+        >
+          {{ exercise.completed ? '完成过' : '未开始' }}
         </span>
         <BaseButton 
           @click="$emit('start', exercise.id)"

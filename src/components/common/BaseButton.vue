@@ -15,7 +15,7 @@
 import { computed } from 'vue'
 
 interface Props {
-	variant?: 'primary' | 'secondary' | 'tertiary' | 'ghost'
+	variant?: 'primary' | 'secondary' | 'tertiary' | 'ghost' | 'danger' | 'success'
 	size?: 'sm' | 'md' | 'lg'
 	block?: boolean
 	loading?: boolean
@@ -53,6 +53,10 @@ const variantClass = computed(() => {
 			return 'bg-indigo-200 text-slate-700 hover:bg-indigo-300 font-medium '
 		case 'ghost':
 			return 'bg-transparent text-slate-700 hover:bg-slate-100 font-medium'
+		case 'danger':
+			return 'bg-red-100 text-red-700 hover:bg-red-200 font-medium'
+		case 'success':
+			return 'bg-green-100 text-green-700 hover:bg-green-200 font-medium'
 		default:
 			return 'bg-indigo-600 text-white hover:bg-indigo-700 font-semibold'
 	}

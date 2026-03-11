@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { BaseButton } from '@/components'
+import { apiAiAnalyze, type AiAnalyzeResponse } from '@/api/ai'
 import { BaseCard } from '@/components'
 
 const props = defineProps<{
@@ -11,10 +12,7 @@ const props = defineProps<{
 }>()
 
 const loading = ref(false)
-const result = ref<null | {
-  explanation: string
-  vocab: { word: string; meaning: string }[]
-}>(null)
+const result = ref<AiAnalyzeResponse | null>(null)
 
 const askAI = async () => {
   if (!props.selection.text) return
@@ -22,23 +20,21 @@ const askAI = async () => {
   loading.value = true
   result.value = null
 
-  // 模拟 AI 请求
-  await new Promise((r) => setTimeout(r, 900))
-
-  result.value = {
-    explanation:
-      '这是一个典型的雅思阅读长句。主干是 “marine biologists are turning to algorithms”，后半部分通过现在分词结构补充说明原因。',
-    vocab: [
-      { word: 'marine', meaning: '海洋的' },
-      { word: 'algorithm', meaning: '算法' },
-      { word: 'increasingly', meaning: '越来越多地' }
-    ]
+  try {
+    const { data } = await apiAiAnalyze({
+      text: props.selection.text,
+      articleTitle: props.selection.articleTitle
+    })
+    if (data.code === 0) {
+      result.value = data.data
+    }
+  } catch (e) {
+    console.error('AI分析失败', e)
+  } finally {
+    loading.value = false
   }
-
-  loading.value = false
 }
 
-// 每次重新划词，清空旧结果
 watch(
   () => props.selection.text,
   () => {

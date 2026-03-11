@@ -1,5 +1,5 @@
 export interface Question {
-  id: string
+  id: number
   type: 'TRUE_FALSE_NOT_GIVEN' | 'MULTIPLE_CHOICE'
   questionText: string
   options?: string[]
@@ -13,6 +13,7 @@ export interface Article {
   id: number
   title: string
   category: string
+  difficulty?: 'easy' | 'medium' | 'hard'
   source?: string
   content: string
   questions: Question[]
@@ -28,6 +29,7 @@ export interface RecentArticle {
   category: string
   readDate?: string
   progress?: number
+  everCompleted?: boolean
 }
 
 export interface Exercise {

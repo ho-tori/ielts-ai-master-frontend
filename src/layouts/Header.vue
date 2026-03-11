@@ -13,7 +13,7 @@
     <div class="flex items-center space-x-6">
       <div class="flex items-center bg-slate-100 rounded-full px-4 py-1.5 space-x-2">
         <Icon icon="heroicons:fire-solid" class="text-amber-500" />
-        <span class="text-sm font-bold">12 Days</span>
+        <span class="text-sm font-bold">{{ streakDays }} Days</span>
       </div>
       <BaseButton variant="ghost" size="sm" @click="goAccount" title="个人信息">
         <Icon icon="heroicons:cog-6-tooth" class="text-slate-600 text-xl" />
@@ -23,11 +23,32 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { BaseButton } from '@/components'
+import { apiGetUserStats } from '@/api/stats'
+import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
+const userStore = useUserStore()
+const streakDays = ref(0)
+
+const fetchStreakDays = async () => {
+  if (!userStore.user) return
+  try {
+    const { data } = await apiGetUserStats()
+    if (data.code === 0) {
+      streakDays.value = data.data.streakDays || 0
+    }
+  } catch (e) {
+    console.warn('获取连续学习天数失败', e)
+  }
+}
+
+onMounted(() => {
+  fetchStreakDays()
+})
 
 function goAccount() {
   router.push('/account')

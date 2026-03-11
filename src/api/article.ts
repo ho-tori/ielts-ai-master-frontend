@@ -2,7 +2,7 @@ import request from './request'
 import type { ApiResponse } from '../types/api'
 import type { Article } from '../types/article'
 
-export function getArticleList(params?: { category?: string; page?: number }) {
+export function getArticleList(params?: { category?: string; difficulty?: string; page?: number }) {
   return request.get<ApiResponse<Article[]>>('/articles', { params })
 }
 

@@ -4,9 +4,11 @@ export interface User {
 	email: string
 	avatar?: string
 	phone?: string
-	target?: string // 备考目标 (如 6.0, 6.5, 7.0 等)
-	badges?: string[] // 徽章
-	recentArticles?: number[] // 最近阅读的文章ID列表
+	target?: string
+	badges?: string[]
+	recentArticles?: number[]
+	reminderEnabled?: boolean
+	reminderTime?: string
 }
 
 // 用户认证信息（仅用于登录时的验证）
@@ -17,6 +19,14 @@ export interface UserAuth extends User {
 export interface LoginPayload {
 	email: string
 	password: string
+}
+
+export interface RegisterPayload {
+	email: string
+	password: string
+	name: string
+	phone?: string
+	target?: string
 }
 
 export interface LoginResponse {
@@ -47,5 +57,11 @@ export interface EditProfilePayload {
 export interface AccountSecurityPayload {
 	phone: string
 	password: string
+}
+
+// 学习提醒表单
+export interface ReminderPayload {
+	reminderEnabled: boolean
+	reminderTime: string
 }
 

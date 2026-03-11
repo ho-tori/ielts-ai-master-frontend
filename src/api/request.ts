@@ -3,7 +3,7 @@ import { getToken, clearAuth } from '../utils/storage'
 
 const instance = axios.create({
 	baseURL: import.meta.env.VITE_API_BASE || '/api',
-	timeout: 15000
+	timeout: 60000
 })
 
 instance.interceptors.request.use((config) => {

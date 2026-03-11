@@ -1,43 +1,96 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import SearchBar from './components/SearchBar.vue'
 import ExerciseCard from './components/ExerciseCard.vue'
 import EmptyState from './components/EmptyState.vue'
 import Pagination from './components/Pagination.vue'
-import { mockExercises } from '@/data/article'
+import { getArticleList } from '@/api/article'
+import { apiGetAllProgress } from '@/api/progress'
 import { useUserStore } from '@/stores/user'
+import type { Exercise } from '../../types/article'
 
 const router = useRouter()
 const userStore = useUserStore()
 
-// 分页配置
 const currentPage = ref(1)
 const itemsPerPage = 9
 
-// 搜索相关
 const searchKeyword = ref('')
 const selectedDifficulty = ref<'all' | 'easy' | 'medium' | 'hard'>('all')
 const selectedCategory = ref<'all' | 'news' | 'academic' | 'fiction'>('all')
 
-// 过滤习题
+const exercisesFromApi = ref<Exercise[]>([])
+const loading = ref(false)
+const error = ref<string | null>(null)
+const everCompletedMap = ref<Map<number, boolean>>(new Map())
+
+const fetchProgress = async () => {
+  if (!userStore.user) return
+  try {
+    const { data } = await apiGetAllProgress()
+    if (data.code === 0) {
+      everCompletedMap.value.clear()
+      data.data.forEach(p => {
+        if (p.everCompleted !== undefined) {
+          everCompletedMap.value.set(p.articleId, p.everCompleted)
+        }
+      })
+    }
+  } catch (e) {
+    console.warn('获取进度失败', e)
+  }
+}
+
+const fetchExercises = async () => {
+  loading.value = true
+  error.value = null
+  try {
+    const { data } = await getArticleList({ 
+      category: selectedCategory.value === 'all' ? undefined : selectedCategory.value,
+      difficulty: selectedDifficulty.value === 'all' ? undefined : selectedDifficulty.value,
+      page: currentPage.value - 1
+    })
+    if (data.code === 0) {
+      exercisesFromApi.value = data.data.map((article: any) => ({
+        id: article.id,
+        title: article.title,
+        description: article.description || '',
+        difficulty: article.difficulty || 'medium',
+        category: article.category || 'academic',
+        tags: article.tags || [],
+        wordCount: article.wordCount || 0,
+        estimatedTime: article.readingTime ? `${article.readingTime}分钟` : '15分钟',
+        questionCount: article.questions?.length || 0,
+        completed: everCompletedMap.value.get(article.id) === true
+      }))
+    } else {
+      error.value = data.message || '获取练习列表失败'
+    }
+  } catch (e) {
+    console.error('从后端获取练习列表失败', e)
+    error.value = '网络错误，请检查后端服务是否启动'
+    exercisesFromApi.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(async () => {
+  await fetchProgress()
+  await fetchExercises()
+})
+
+// 过滤习题（仅前端关键字搜索）
 const filteredExercises = computed(() => {
-  return mockExercises.filter(exercise => {
+  return exercisesFromApi.value.filter(exercise => {
     // 按关键字搜索
     const matchKeyword = !searchKeyword.value || 
       exercise.title.toLowerCase().includes(searchKeyword.value.toLowerCase()) ||
       exercise.description.toLowerCase().includes(searchKeyword.value.toLowerCase()) ||
       exercise.tags.some(tag => tag.toLowerCase().includes(searchKeyword.value.toLowerCase()))
     
-    // 按难度过滤
-    const matchDifficulty = selectedDifficulty.value === 'all' || 
-      exercise.difficulty === selectedDifficulty.value
-    
-    // 按分类过滤
-    const matchCategory = selectedCategory.value === 'all' || 
-      exercise.category === selectedCategory.value
-    
-    return matchKeyword && matchDifficulty && matchCategory
+    return matchKeyword
   })
 })
 
@@ -61,9 +114,11 @@ const handleDifficultyChange = (value: string) => {
   currentPage.value = 1
 }
 
-const handleCategoryChange = (value: string) => {
+const handleCategoryChange = async (value: string) => {
   selectedCategory.value = value as any
   currentPage.value = 1
+  await fetchProgress()
+  await fetchExercises()
 }
 
 // 开始练习
@@ -110,8 +165,18 @@ const startPractice = (exerciseId: number) => {
       </p>
     </div>
 
+    <!-- 加载状态 -->
+    <div v-if="loading" class="flex justify-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>
+
+    <!-- 错误提示 -->
+    <div v-else-if="error" class="p-4 bg-red-50 border border-red-200 rounded-lg">
+      <p class="text-red-800 text-sm">❌ {{ error }}</p>
+    </div>
+
     <!-- 习题卡片列表（纵向排列，一行一个） -->
-    <div v-if="paginatedExercises.length > 0" class="space-y-4">
+    <div v-else-if="paginatedExercises.length > 0" class="space-y-4">
       <ExerciseCard 
         v-for="exercise in paginatedExercises"
         :key="exercise.id"
