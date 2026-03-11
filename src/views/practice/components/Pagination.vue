@@ -46,6 +46,7 @@ const props = defineProps<Props>()
     <BaseButton
       variant="secondary"
       size="sm"
+      class="!bg-transparent hover:!bg-transparent hover:!text-indigo-600"
       :disabled="currentPage === 1"
       @click="handleFirstPage"
     >
@@ -55,13 +56,14 @@ const props = defineProps<Props>()
     <BaseButton
       variant="secondary"
       size="sm"
+      class="!bg-transparent hover:!bg-transparent hover:!text-indigo-600"
       :disabled="currentPage === 1"
       @click="handlePreviousPage"
     >
       上一页
     </BaseButton>
 
-    <div class="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-lg">
+    <div class="flex items-center gap-2 px-4 py-2">
       <span class="text-sm text-slate-600">第</span>
       <input
         :value="currentPage"
@@ -77,6 +79,7 @@ const props = defineProps<Props>()
     <BaseButton
       variant="secondary"
       size="sm"
+      class="!bg-transparent hover:!bg-transparent hover:!text-indigo-600"
       :disabled="currentPage === totalPages"
       @click="handleNextPage"
     >
@@ -86,6 +89,7 @@ const props = defineProps<Props>()
     <BaseButton
       variant="secondary"
       size="sm"
+      class="!bg-transparent hover:!bg-transparent hover:!text-indigo-600"
       :disabled="currentPage === totalPages"
       @click="handleLastPage"
     >

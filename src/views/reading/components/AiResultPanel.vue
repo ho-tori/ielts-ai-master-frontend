@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { BaseButton } from '@/components'
+import { BaseCard } from '@/components'
 
 const props = defineProps<{
   selection: {
@@ -47,9 +48,11 @@ watch(
 </script>
 
 <template>
-  <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 h-full flex flex-col">
-    <h4 class="font-bold mb-4">AI 辅助面板</h4>
-
+  <BaseCard>
+  <template #header>
+      <h3 class="font-semibold text-slate-800">AI 辅助面板</h3>
+    </template>
+  <div class="space-y-4">
     <!-- 未选择 -->
     <div
       v-if="!selection.text"
@@ -96,4 +99,5 @@ watch(
       </div>
     </div>
   </div>
+  </BaseCard>
 </template>
