@@ -31,9 +31,9 @@
         autocomplete="current-password"
         :minlength="6"
         :show-toggle="true"
-        :is-password-visible="showPassword"
+        :is-password-visible="isPasswordVisible"
         required
-        @toggle-password="showPassword = !showPassword"
+        @toggle-password="isPasswordVisible = !isPasswordVisible"
       />
 
       <ErrorState v-if="error" :message="error" />
@@ -76,8 +76,9 @@ import { storeToRefs } from 'pinia'
 import { BaseCard, BaseButton, BaseInput, ErrorState } from '@/components'
 import { useUserStore } from '../../stores/user'
 import { apiRegister } from '../../api/user'
+import { setToken, setRole } from '../../utils/storage'
 
-const showPassword = ref(false)
+const isPasswordVisible = ref(false)
 const isRegister = ref(false)
 const form = reactive({ email: '', password: '', name: '' })
 const router = useRouter()
@@ -101,9 +102,14 @@ async function onSubmit() {
         name: form.name 
       })
       if (data.code === 0) {
+        const normalizedUser = {
+          ...data.data.user,
+          role: data.data.user.role || 'user'
+        }
         userStore.token = data.data.token
-        userStore.user = data.data.user
-        localStorage.setItem('ielts_token', data.data.token)
+        userStore.user = normalizedUser
+        setToken(data.data.token)
+        setRole(normalizedUser.role)
         const redirect = (router.currentRoute.value.query.redirect as string) || '/'
         router.replace(redirect)
       } else {
