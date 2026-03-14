@@ -1,17 +1,28 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue';
+import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user';
 
 const route = useRoute();
 const router = useRouter();
+const userStore = useUserStore();
 
 // 定义导航菜单配置
 const menuItems = [
   { name: 'Dashboard', path: '/', icon: 'heroicons:chart-bar' },
   { name: 'Reading', path: '/reading', icon: 'heroicons:book-open' },
   { name: 'Practice', path: '/practice', icon: 'heroicons:pencil-square' },
-  { name: 'Lab', path: '/lab', icon: 'heroicons:beaker' },
+  { name: 'Lab', path: '/lab', icon: 'heroicons:beaker' }
 ];
+
+const visibleMenuItems = computed(() => {
+  const items = [...menuItems]
+  if (userStore.isAdmin) {
+    items.push({ name: 'Admin', path: '/admin/upload', icon: 'heroicons:shield-check' })
+  }
+  return items
+})
 
 function goAccount() {
   router.push('/account')
@@ -26,7 +37,7 @@ function goAccount() {
     <div class="space-y-8">
       <!-- 循环渲染菜单按钮 -->
       <router-link
-        v-for="item in menuItems"
+        v-for="item in visibleMenuItems"
         :key="item.path"
         :to="item.path"
         class="p-3 rounded-2xl transition-all group relative block"

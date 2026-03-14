@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import DefaultLayout from '../layouts/DefaultLayout.vue'
 import authRoutes from './routes/auth'
-import { getToken } from '../utils/storage'
+import { getToken, getRole } from '../utils/storage'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -34,8 +34,20 @@ const router = createRouter({
           name: 'Account',
           component: () => import('../views/account/AccountView.vue'),
           meta: { requiresAuth: true }
+        },
+        {
+          path: 'admin/upload',
+          name: 'AdminUpload',
+          component: () => import('../views/admin/AdminUploadView.vue'),
+          meta: { requiresAuth: true, roles: ['admin'] }
         }
       ]
+    },
+    {
+      path: '/403',
+      name: 'Forbidden',
+      component: () => import('../views/notfound/NotFoundView.vue'),
+      meta: { requiresAuth: true }
     },
     // 404 页面 - 需要放在最后
     {
@@ -48,10 +60,22 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   const token = getToken()
+  const role = getRole()
   const needsAuth = to.matched.some(r => (r.meta as any)?.requiresAuth !== false)
+  const requiredRoles = to.matched
+    .flatMap(r => ((r.meta as any)?.roles || []) as string[])
+
   if (needsAuth && to.path !== '/login' && !token) {
     return { path: '/login', query: { redirect: to.fullPath } }
   }
+
+  if (requiredRoles.length > 0 && token) {
+    const hasPermission = role ? requiredRoles.includes(role) : false
+    if (!hasPermission) {
+      return { path: '/403' }
+    }
+  }
+
   if (to.path === '/login' && token) {
     return { path: '/' }
   }

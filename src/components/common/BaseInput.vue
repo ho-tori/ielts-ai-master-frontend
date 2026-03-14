@@ -37,7 +37,7 @@ interface Props {
   isPasswordVisible?: boolean
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   type: 'text',
   required: false,
   showToggle: false,
@@ -50,8 +50,10 @@ defineEmits<{
 }>()
 
 const inputType = computed(() => {
-  // 这个计算属性会在组件使用时通过 isPasswordVisible 来动态确定
-  return 'text'
+  if (props.type === 'password') {
+    return props.isPasswordVisible ? 'text' : 'password'
+  }
+  return props.type
 })
 </script>
 

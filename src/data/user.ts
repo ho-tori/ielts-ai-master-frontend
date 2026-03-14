@@ -5,6 +5,18 @@ import type { User, UserStats, UserProfile, LoginPayload, LoginResponse, UserAut
  */
 export const mockUsersAuth: UserAuth[] = [
   {
+    id: 'admin_001',
+    name: '系统管理员',
+    email: 'admin@example.com',
+    password: 'admin123',
+    role: 'admin',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
+    phone: '18800000000',
+    target: '8.5',
+    badges: ['系统维护者', '内容审核员'],
+    recentArticles: [1, 2, 3]
+  },
+  {
     id: 'user_001',
     name: '张三',
     email: 'zhangsan@example.com',

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { apiLogin, apiProfile, apiUpdateRecentArticles } from '../api/user'
 import type { User, LoginPayload } from '../types/user'
-import { getToken, setToken, clearAuth } from '../utils/storage'
+import { getToken, setToken, clearAuth, setRole } from '../utils/storage'
 
 interface State {
 	token: string | null
@@ -17,6 +17,9 @@ export const useUserStore = defineStore('user', {
 		loading: false,
 		error: null
 	}),
+	getters: {
+		isAdmin: (state) => state.user?.role === 'admin'
+	},
 	actions: {
 		async login(payload: LoginPayload) {
 			this.loading = true
@@ -24,10 +27,15 @@ export const useUserStore = defineStore('user', {
 			try {
 				const { data } = await apiLogin(payload)
 				if (data.code !== 0) throw new Error(data.message || '登录失败')
+				const normalizedUser: User = {
+					...data.data.user,
+					role: data.data.user.role || 'user'
+				}
 				setToken(data.data.token)
+				setRole(normalizedUser.role)
 				this.token = data.data.token
-				this.user = data.data.user
-				console.log(`✅ 用户 ${data.data.user.name} 登录成功`)
+				this.user = normalizedUser
+				console.log(`✅ 用户 ${normalizedUser.name} 登录成功`)
 				return true
 			} catch (e: any) {
 				this.error = e?.message || '登录失败'
@@ -42,7 +50,12 @@ export const useUserStore = defineStore('user', {
 			try {
 				const { data } = await apiProfile()
 				if (data.code === 0) {
-					this.user = data.data
+					const normalizedUser: User = {
+						...data.data,
+						role: data.data.role || 'user'
+					}
+					this.user = normalizedUser
+					setRole(normalizedUser.role)
 				}
 			} catch (e: any) {
 				if (e?.response?.status === 403 || e?.response?.status === 401) {
