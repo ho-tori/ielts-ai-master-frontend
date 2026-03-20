@@ -1,24 +1,7 @@
 import request from './request'
 import type { ApiResponse } from '../types/api'
-
-export interface UserStatsResponse {
-	totalArticles: number
-	totalVocabulary: number
-	streakDays: number
-}
-
-export interface ReadingProgressResponse {
-	dailyProgress: Array<{
-		date: string
-		articlesRead: number
-		wordsLearned: number
-	}>
-}
+import type { UserStats } from '../types/user'
 
 export function apiGetUserStats() {
-	return request.get<ApiResponse<UserStatsResponse>>('/stats')
-}
-
-export function apiGetReadingProgress() {
-	return request.get<ApiResponse<ReadingProgressResponse>>('/stats/reading-progress')
+	return request.get<ApiResponse<UserStats>>('/stats')
 }

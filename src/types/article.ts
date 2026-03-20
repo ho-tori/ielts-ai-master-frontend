@@ -1,46 +1,81 @@
+export interface QuestionOption {
+	label: string
+	content: string
+}
+
 export interface Question {
-  id: number
-  type: 'TRUE_FALSE_NOT_GIVEN' | 'MULTIPLE_CHOICE'
-  questionText: string
-  options?: string[]
-  answer?: string
-  userAnswer?: string
-  explanation?: string
-  difficulty?: 'easy' | 'medium' | 'hard'
+	id: number
+	questionNumber: number
+	questionTypeCode: string
+	questionTypeName: string
+	stem: string
+	options?: QuestionOption[]
+	correctAnswer?: string
+	userAnswer?: string
+	analysis?: string
+	answerParagraphNumber: number
+	answerSentenceIndex: number
+}
+
+export interface Paragraph {
+	paragraphNumber: number
+	content: string
+	translation?: string
+	sentenceList: string[]
+	sentenceTranslationList?: string[]
+}
+
+export interface Topic {
+	id: number
+	code: string
+	name: string
 }
 
 export interface Article {
-  id: number
-  title: string
-  category: string
-  difficulty?: 'easy' | 'medium' | 'hard'
-  source?: string
-  content: string
-  questions: Question[]
-  author?: string
-  publishDate?: string
-  wordCount?: number
-  readingTime?: number
+	id: number
+	title: string
+	examType: string
+	difficulty: string
+	paragraphs: Paragraph[]
+	topics: Topic[]
+	questions: Question[]
+}
+
+export interface ArticleListItem {
+	id: number
+	title: string
+	examType: string
+	difficulty: string
+	topics?: Topic[]
 }
 
 export interface RecentArticle {
-  id: number
-  title: string
-  category: string
-  readDate?: string
-  progress?: number
-  everCompleted?: boolean
+	id: number
+	title: string
+	category: string
+	readDate?: string
 }
 
 export interface Exercise {
-  id: number
-  title: string
-  category: 'news' | 'academic' | 'fiction'
-  difficulty: 'easy' | 'medium' | 'hard'
-  wordCount: number
-  estimatedTime: string
-  description: string
-  tags: string[]
-  completed?: boolean
-  score?: number
+	id: number
+	title: string
+	examType: string
+	difficulty: string
+	description: string
+	tags: string[]
+	wordCount: number
+	estimatedTime: string
+	questionCount: number
+	completed?: boolean
+}
+
+export interface SubmitAnswerRequest {
+	questionId: number
+	userAnswer: string
+}
+
+export interface SubmitAnswerResponse {
+	isCorrect: boolean
+	correctAnswer: string
+	analysis: string
 }

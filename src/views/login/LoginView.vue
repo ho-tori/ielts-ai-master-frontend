@@ -7,20 +7,28 @@
 
       <BaseInput
         v-if="isRegister"
-        v-model="form.name"
+        v-model="form.nickname"
         type="text"
-        label="姓名"
-        placeholder="请输入姓名"
+        label="昵称"
+        placeholder="请输入昵称"
+      />
+
+      <BaseInput
+        v-model="form.username"
+        type="text"
+        label="用户名"
+        placeholder="请输入用户名"
+        autocomplete="username"
         required
       />
 
       <BaseInput
+        v-if="isRegister"
         v-model="form.email"
         type="email"
-        label="邮箱"
+        label="邮箱（可选）"
         placeholder="you@example.com"
         autocomplete="email"
-        required
       />
 
       <BaseInput
@@ -60,9 +68,9 @@
           variant="secondary"
           size="sm"
           block
-          @click="quickLogin('AA@example.com', '111111')"
+          @click="quickLogin('admin', 'admin123')"
         >
-          测试用户
+          测试管理员
         </BaseButton>
       </div>
     </form>
@@ -76,11 +84,11 @@ import { storeToRefs } from 'pinia'
 import { BaseCard, BaseButton, BaseInput, ErrorState } from '@/components'
 import { useUserStore } from '../../stores/user'
 import { apiRegister } from '../../api/user'
-import { setToken, setRole } from '../../utils/storage'
+import { setToken } from '../../utils/storage'
 
 const isPasswordVisible = ref(false)
 const isRegister = ref(false)
-const form = reactive({ email: '', password: '', name: '' })
+const form = reactive({ username: '', password: '', nickname: '', email: '' })
 const router = useRouter()
 const userStore = useUserStore()
 const { loading, error } = storeToRefs(userStore)
@@ -91,25 +99,20 @@ function toggleMode() {
 }
 
 async function onSubmit() {
-  if (!form.email || !form.password) return
+  if (!form.username || !form.password) return
   
   if (isRegister.value) {
-    if (!form.name) return
     try {
       const { data } = await apiRegister({ 
-        email: form.email, 
+        username: form.username, 
         password: form.password, 
-        name: form.name 
+        nickname: form.nickname,
+        email: form.email
       })
       if (data.code === 0) {
-        const normalizedUser = {
-          ...data.data.user,
-          role: data.data.user.role || 'user'
-        }
         userStore.token = data.data.token
-        userStore.user = normalizedUser
+        userStore.user = data.data.user
         setToken(data.data.token)
-        setRole(normalizedUser.role)
         const redirect = (router.currentRoute.value.query.redirect as string) || '/'
         router.replace(redirect)
       } else {
@@ -119,7 +122,7 @@ async function onSubmit() {
       userStore.error = e?.response?.data?.message || '注册失败'
     }
   } else {
-    const ok = await userStore.login({ email: form.email, password: form.password })
+    const ok = await userStore.login({ username: form.username, password: form.password })
     if (ok) {
       const redirect = (router.currentRoute.value.query.redirect as string) || '/'
       router.replace(redirect)
@@ -127,8 +130,8 @@ async function onSubmit() {
   }
 }
 
-function quickLogin(email: string, password: string) {
-  form.email = email
+function quickLogin(username: string, password: string) {
+  form.username = username
   form.password = password
   onSubmit()
 }

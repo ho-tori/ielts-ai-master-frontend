@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
-import { apiLogin, apiProfile, apiUpdateRecentArticles } from '../api/user'
+import { apiLogin, apiProfile } from '../api/user'
 import type { User, LoginPayload } from '../types/user'
-import { getToken, setToken, clearAuth, setRole } from '../utils/storage'
+import { getToken, setToken, clearAuth } from '../utils/storage'
 
 interface State {
 	token: string | null
@@ -18,7 +18,7 @@ export const useUserStore = defineStore('user', {
 		error: null
 	}),
 	getters: {
-		isAdmin: (state) => state.user?.role === 'admin'
+		isLoggedIn: (state) => !!state.token && !!state.user
 	},
 	actions: {
 		async login(payload: LoginPayload) {
@@ -27,15 +27,10 @@ export const useUserStore = defineStore('user', {
 			try {
 				const { data } = await apiLogin(payload)
 				if (data.code !== 0) throw new Error(data.message || '登录失败')
-				const normalizedUser: User = {
-					...data.data.user,
-					role: data.data.user.role || 'user'
-				}
 				setToken(data.data.token)
-				setRole(normalizedUser.role)
 				this.token = data.data.token
-				this.user = normalizedUser
-				console.log(`✅ 用户 ${normalizedUser.name} 登录成功`)
+				this.user = data.data.user
+				console.log(`✅ 用户 ${data.data.user.username} 登录成功`)
 				return true
 			} catch (e: any) {
 				this.error = e?.message || '登录失败'
@@ -50,12 +45,7 @@ export const useUserStore = defineStore('user', {
 			try {
 				const { data } = await apiProfile()
 				if (data.code === 0) {
-					const normalizedUser: User = {
-						...data.data,
-						role: data.data.role || 'user'
-					}
-					this.user = normalizedUser
-					setRole(normalizedUser.role)
+					this.user = data.data
 				}
 			} catch (e: any) {
 				if (e?.response?.status === 403 || e?.response?.status === 401) {
@@ -72,39 +62,19 @@ export const useUserStore = defineStore('user', {
 			this.user = null
 		},
 
-		async addRecentArticle(articleId: number) {
-			if (!this.user) {
-				console.warn('❌ 用户未登录，无法添加最近阅读')
-				return
-			}
-
+		addRecentArticle(articleId: number) {
+			if (!this.user) return
 			if (!this.user.recentArticles) {
 				this.user.recentArticles = []
 			}
-
 			const index = this.user.recentArticles.indexOf(articleId)
 			if (index > -1) {
 				this.user.recentArticles.splice(index, 1)
 			}
-
 			this.user.recentArticles.unshift(articleId)
-
 			if (this.user.recentArticles.length > 10) {
-				this.user.recentArticles.pop()
-			}
-
-			console.log('📚 文章添加到最近阅读:', this.user.recentArticles)
-
-			try {
-				const { data } = await apiUpdateRecentArticles(this.user.recentArticles)
-				if (data.code === 0) {
-					this.user = data.data
-					console.log('☁️ 最近阅读已同步到服务器')
-				}
-			} catch (e) {
-				console.warn('⚠️ 同步最近阅读到服务器失败', e)
+				this.user.recentArticles = this.user.recentArticles.slice(0, 10)
 			}
 		}
 	}
 })
-

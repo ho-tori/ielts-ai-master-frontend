@@ -6,7 +6,6 @@ import ExerciseCard from './components/ExerciseCard.vue'
 import EmptyState from './components/EmptyState.vue'
 import Pagination from './components/Pagination.vue'
 import { getArticleList } from '@/api/article'
-import { apiGetAllProgress } from '@/api/progress'
 import { useUserStore } from '@/stores/user'
 import type { Exercise } from '../../types/article'
 
@@ -23,24 +22,6 @@ const selectedCategory = ref<'all' | 'news' | 'academic' | 'fiction'>('all')
 const exercisesFromApi = ref<Exercise[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
-const everCompletedMap = ref<Map<number, boolean>>(new Map())
-
-const fetchProgress = async () => {
-  if (!userStore.user) return
-  try {
-    const { data } = await apiGetAllProgress()
-    if (data.code === 0) {
-      everCompletedMap.value.clear()
-      data.data.forEach(p => {
-        if (p.everCompleted !== undefined) {
-          everCompletedMap.value.set(p.articleId, p.everCompleted)
-        }
-      })
-    }
-  } catch (e) {
-    console.warn('获取进度失败', e)
-  }
-}
 
 const fetchExercises = async () => {
   loading.value = true
@@ -62,7 +43,7 @@ const fetchExercises = async () => {
         wordCount: article.wordCount || 0,
         estimatedTime: article.readingTime ? `${article.readingTime}分钟` : '15分钟',
         questionCount: article.questions?.length || 0,
-        completed: everCompletedMap.value.get(article.id) === true
+        completed: false
       }))
     } else {
       error.value = data.message || '获取练习列表失败'
@@ -77,14 +58,11 @@ const fetchExercises = async () => {
 }
 
 onMounted(async () => {
-  await fetchProgress()
   await fetchExercises()
 })
 
-// 过滤习题（仅前端关键字搜索）
 const filteredExercises = computed(() => {
   return exercisesFromApi.value.filter(exercise => {
-    // 按关键字搜索
     const matchKeyword = !searchKeyword.value || 
       exercise.title.toLowerCase().includes(searchKeyword.value.toLowerCase()) ||
       exercise.description.toLowerCase().includes(searchKeyword.value.toLowerCase()) ||
@@ -94,7 +72,6 @@ const filteredExercises = computed(() => {
   })
 })
 
-// 分页计算
 const totalPages = computed(() => Math.max(1, Math.ceil(filteredExercises.value.length / itemsPerPage)))
 
 const paginatedExercises = computed(() => {
@@ -103,7 +80,6 @@ const paginatedExercises = computed(() => {
   return filteredExercises.value.slice(start, end)
 })
 
-// 监听搜索条件变化，重置到第一页
 const handleSearch = (value: string) => {
   searchKeyword.value = value
   currentPage.value = 1
@@ -117,35 +93,27 @@ const handleDifficultyChange = (value: string) => {
 const handleCategoryChange = async (value: string) => {
   selectedCategory.value = value as any
   currentPage.value = 1
-  await fetchProgress()
   await fetchExercises()
 }
 
-// 开始练习
 const startPractice = (exerciseId: number) => {
   console.log('🚀 开始练习，exerciseId:', exerciseId)
-  console.log('👤 当前用户:', userStore.user?.name)
   
-  // exerciseId 与 articleId 一一对应
   const articleId = exerciseId
   
-  // 将文章添加到用户最近阅读列表
   userStore.addRecentArticle(articleId)
   
-  // 跳转到阅读页面
   router.push(`/reading?exerciseId=${exerciseId}`)
 }
 </script>
 
 <template>
   <div class="space-y-6">
-    <!-- 页面标题 -->
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-slate-900 mb-2">练习中心</h1>
       <p class="text-slate-600">搜索并练习IELTS阅读考试题目</p>
     </div>
 
-    <!-- 搜索和过滤区域 -->
     <SearchBar 
       v-model="searchKeyword"
       :difficulty="selectedDifficulty"
@@ -155,7 +123,6 @@ const startPractice = (exerciseId: number) => {
       @update:category="handleCategoryChange"
     />
 
-    <!-- 搜索结果统计 -->
     <div class="mb-6">
       <p class="text-slate-600">
         找到 <span class="font-semibold text-slate-900">{{ filteredExercises.length }}</span> 个相关习题
@@ -165,17 +132,14 @@ const startPractice = (exerciseId: number) => {
       </p>
     </div>
 
-    <!-- 加载状态 -->
     <div v-if="loading" class="flex justify-center py-12">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
     </div>
 
-    <!-- 错误提示 -->
     <div v-else-if="error" class="p-4 bg-red-50 border border-red-200 rounded-lg">
       <p class="text-red-800 text-sm">❌ {{ error }}</p>
     </div>
 
-    <!-- 习题卡片列表（纵向排列，一行一个） -->
     <div v-else-if="paginatedExercises.length > 0" class="space-y-4">
       <ExerciseCard 
         v-for="exercise in paginatedExercises"
@@ -185,10 +149,8 @@ const startPractice = (exerciseId: number) => {
       />
     </div>
 
-    <!-- 空状态 -->
     <EmptyState v-else />
 
-    <!-- 分页组件 -->
     <div class="mt-8">
       <Pagination 
         :current-page="currentPage"
