@@ -2,14 +2,14 @@
   <BaseCard class="mb-8">
     <!-- 搜索框 -->
     <div class="mb-6">
-      <div class="flex items-center gap-3 bg-slate-50 rounded-lg px-4 py-3 border border-slate-200">
-        <Icon icon="heroicons:magnifying-glass" class="text-xl text-slate-400" />
+      <div class="flex items-center gap-3 bg-surface-muted rounded-lg px-4 py-3 border border-border">
+        <Icon icon="heroicons:magnifying-glass" class="text-xl text-text-secondary/70" />
         <input 
           :value="modelValue"
           @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
           type="text"
           placeholder="搜索关键字、标题或标签..."
-          class="flex-1 bg-transparent outline-none text-slate-900 placeholder-slate-500"
+          class="flex-1 bg-transparent outline-none text-text-primary placeholder:text-text-secondary"
         />
       </div>
     </div>
@@ -18,7 +18,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <!-- 难度过滤 -->
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-3">难度</label>
+        <label class="block text-sm font-medium text-text-secondary mb-3">难度</label>
         <div class="flex gap-2">
           <BaseButton
             v-for="level in ['all', 'easy', 'medium', 'hard']"
@@ -34,7 +34,7 @@
 
       <!-- 分类过滤 -->
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-3">分类</label>
+        <label class="block text-sm font-medium text-text-secondary mb-3">分类</label>
         <div class="flex gap-2">
           <BaseButton
             v-for="cat in ['all', 'news', 'academic', 'fiction']"

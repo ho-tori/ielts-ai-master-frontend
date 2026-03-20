@@ -48,17 +48,17 @@ const sizeClass = computed(() => {
 const variantClass = computed(() => {
 	switch (props.variant) {
 		case 'secondary':
-			return 'bg-slate-100 text-slate-700 hover:bg-slate-200  font-medium'
+			return 'bg-surface-muted text-text-secondary hover:bg-border font-medium'
 		case 'tertiary':
-			return 'bg-indigo-200 text-slate-700 hover:bg-indigo-300 font-medium '
+			return 'bg-primary/20 text-text-primary hover:bg-primary/30 font-medium '
 		case 'ghost':
-			return 'bg-transparent text-slate-700 hover:bg-slate-100 font-medium'
+			return 'bg-transparent text-text-secondary hover:bg-surface-muted font-medium'
 		case 'danger':
-			return 'bg-red-100 text-red-700 hover:bg-red-200 font-medium'
+			return 'bg-danger/15 text-danger hover:bg-danger/25 font-medium'
 		case 'success':
-			return 'bg-green-100 text-green-700 hover:bg-green-200 font-medium'
+			return 'bg-success/15 text-success hover:bg-success/25 font-medium'
 		default:
-			return 'bg-indigo-600 text-white hover:bg-indigo-700 font-semibold'
+			return 'bg-primary text-white hover:bg-primary-hover font-semibold'
 	}
 })
 

@@ -2,7 +2,7 @@
   <BaseCard>
     <form class="space-y-4" @submit.prevent="onSubmit">
       <div class="text-center mb-4">
-        <h2 class="text-xl font-bold text-slate-800">{{ isRegister ? '注册账号' : '登录' }}</h2>
+        <h2 class="text-xl font-bold text-text-primary">{{ isRegister ? '注册账号' : '登录' }}</h2>
       </div>
 
       <BaseInput
@@ -49,7 +49,7 @@
       </BaseButton>
 
       <div class="text-center">
-        <button type="button" class="text-sm text-blue-600 hover:underline" @click="toggleMode">
+        <button type="button" class="text-sm text-primary hover:underline" @click="toggleMode">
           {{ isRegister ? '已有账号？去登录' : '没有账号？去注册' }}
         </button>
       </div>

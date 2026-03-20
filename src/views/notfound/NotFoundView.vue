@@ -14,20 +14,20 @@ const goBack = () => {
 </script>
 
 <template>
-  <div class="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+  <div class="flex items-center justify-center min-h-screen bg-gradient-to-br from-surface-muted to-surface">
     <div class="text-center max-w-md px-6">
       <!-- 404 大图标 -->
       <div class="mb-6">
-        <div class="text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
+        <div class="text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-hover">
           404
         </div>
       </div>
 
       <!-- 标题 -->
-      <h1 class="text-3xl font-bold text-slate-900 mb-2">页面不存在</h1>
+      <h1 class="text-3xl font-bold text-text-primary mb-2">页面不存在</h1>
       
       <!-- 描述 -->
-      <p class="text-slate-600 mb-8">
+      <p class="text-text-secondary mb-8">
         抱歉，您访问的页面不存在或已被移除。请检查URL是否正确，或返回首页重新开始。
       </p>
 
@@ -52,9 +52,9 @@ const goBack = () => {
 
       <!-- 装饰元素 -->
       <div class="mt-12 flex justify-center gap-2">
-        <div class="w-2 h-2 rounded-full bg-indigo-300"></div>
-        <div class="w-2 h-2 rounded-full bg-purple-300"></div>
-        <div class="w-2 h-2 rounded-full bg-pink-300"></div>
+        <div class="w-2 h-2 rounded-full bg-primary/40"></div>
+        <div class="w-2 h-2 rounded-full bg-primary/30"></div>
+        <div class="w-2 h-2 rounded-full bg-primary/20"></div>
       </div>
     </div>
   </div>

@@ -54,9 +54,9 @@ function selectChoiceAnswer(value: string) {
 </script>
 
 <template>
-  <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/60 space-y-3">
+  <div class="p-4 rounded-xl border border-border bg-surface-muted/60 space-y-3">
     <div class="flex items-center justify-between">
-      <p class="text-sm font-semibold text-slate-700">题目 {{ index + 1 }}</p>
+      <p class="text-sm font-semibold text-text-secondary">题目 {{ index + 1 }}</p>
       <BaseButton variant="danger" size="sm" :disabled="!canRemove" @click="emit('remove')">删除</BaseButton>
     </div>
 
@@ -88,7 +88,7 @@ function selectChoiceAnswer(value: string) {
     </div>
 
     <div v-if="modelValue.type === 'MULTIPLE_CHOICE'">
-      <label class="block text-sm font-medium text-slate-700 mb-2">标准答案</label>
+      <label class="block text-sm font-medium text-text-secondary mb-2">标准答案</label>
       <div class="grid grid-cols-4 gap-2">
         <BaseButton
           v-for="choice in ['A', 'B', 'C', 'D']"
@@ -104,7 +104,7 @@ function selectChoiceAnswer(value: string) {
     </div>
 
     <div v-else>
-      <label class="block text-sm font-medium text-slate-700 mb-2">标准答案</label>
+      <label class="block text-sm font-medium text-text-secondary mb-2">标准答案</label>
       <div class="grid grid-cols-3 gap-2">
         <BaseButton
           v-for="choice in ['TRUE', 'FALSE', 'NOT GIVEN']"

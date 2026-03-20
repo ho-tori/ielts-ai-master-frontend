@@ -16,7 +16,7 @@
           placeholder="请输入昵称"
           required
         />
-        <p v-if="errors.name" class="text-red-600 text-sm mt-1">{{ errors.name }}</p>
+        <p v-if="errors.name" class="text-danger text-sm mt-1">{{ errors.name }}</p>
       </div>
       
       <div>
@@ -32,7 +32,7 @@
           <option value="7.5">7.5</option>
           <option value="8.0">8.0+</option>
         </BaseSelect>
-        <p v-if="errors.target" class="text-red-600 text-sm mt-1">{{ errors.target }}</p>
+        <p v-if="errors.target" class="text-danger text-sm mt-1">{{ errors.target }}</p>
       </div>
     </div>
   </BaseDialog>
@@ -101,9 +101,6 @@ function handleSave() {
   emit('update:modelValue', false)
 }
 </script>
-
-<style scoped>
-</style>
 
 <style scoped>
 </style>

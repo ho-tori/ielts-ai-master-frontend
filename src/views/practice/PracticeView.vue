@@ -141,8 +141,8 @@ const startPractice = (exerciseId: number) => {
   <div class="space-y-6">
     <!-- 页面标题 -->
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-slate-900 mb-2">练习中心</h1>
-      <p class="text-slate-600">搜索并练习IELTS阅读考试题目</p>
+      <h1 class="text-3xl font-bold text-text-primary mb-2">练习中心</h1>
+      <p class="text-text-secondary">搜索并练习IELTS阅读考试题目</p>
     </div>
 
     <!-- 搜索和过滤区域 -->
@@ -157,9 +157,9 @@ const startPractice = (exerciseId: number) => {
 
     <!-- 搜索结果统计 -->
     <div class="mb-6">
-      <p class="text-slate-600">
-        找到 <span class="font-semibold text-slate-900">{{ filteredExercises.length }}</span> 个相关习题
-        <span v-if="totalPages > 1" class="text-slate-400">
+      <p class="text-text-secondary">
+        找到 <span class="font-semibold text-text-primary">{{ filteredExercises.length }}</span> 个相关习题
+        <span v-if="totalPages > 1" class="text-text-secondary/70">
           · 第 {{ currentPage }} / {{ totalPages }} 页
         </span>
       </p>
@@ -167,12 +167,12 @@ const startPractice = (exerciseId: number) => {
 
     <!-- 加载状态 -->
     <div v-if="loading" class="flex justify-center py-12">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
     </div>
 
     <!-- 错误提示 -->
-    <div v-else-if="error" class="p-4 bg-red-50 border border-red-200 rounded-lg">
-      <p class="text-red-800 text-sm">❌ {{ error }}</p>
+    <div v-else-if="error" class="p-4 bg-danger/10 border border-danger/30 rounded-lg">
+      <p class="text-danger text-sm">❌ {{ error }}</p>
     </div>
 
     <!-- 习题卡片列表（纵向排列，一行一个） -->

@@ -46,7 +46,7 @@ const props = defineProps<Props>()
     <BaseButton
       variant="secondary"
       size="sm"
-      class="!bg-transparent hover:!bg-transparent hover:!text-indigo-600"
+      class="!bg-transparent hover:!bg-transparent hover:!text-primary"
       :disabled="currentPage === 1"
       @click="handleFirstPage"
     >
@@ -56,7 +56,7 @@ const props = defineProps<Props>()
     <BaseButton
       variant="secondary"
       size="sm"
-      class="!bg-transparent hover:!bg-transparent hover:!text-indigo-600"
+      class="!bg-transparent hover:!bg-transparent hover:!text-primary"
       :disabled="currentPage === 1"
       @click="handlePreviousPage"
     >
@@ -64,22 +64,22 @@ const props = defineProps<Props>()
     </BaseButton>
 
     <div class="flex items-center gap-2 px-4 py-2">
-      <span class="text-sm text-slate-600">第</span>
+      <span class="text-sm text-text-secondary">第</span>
       <input
         :value="currentPage"
         type="number"
         :min="1"
         :max="totalPages"
-        class="w-12 px-2 py-1 border border-slate-300 rounded text-center text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600/20"
+        class="w-12 px-2 py-1 border border-border rounded text-center text-sm bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
         @change="handlePageInput"
       />
-      <span class="text-sm text-slate-600">/ {{ totalPages }} 页</span>
+      <span class="text-sm text-text-secondary">/ {{ totalPages }} 页</span>
     </div>
 
     <BaseButton
       variant="secondary"
       size="sm"
-      class="!bg-transparent hover:!bg-transparent hover:!text-indigo-600"
+      class="!bg-transparent hover:!bg-transparent hover:!text-primary"
       :disabled="currentPage === totalPages"
       @click="handleNextPage"
     >
@@ -89,7 +89,7 @@ const props = defineProps<Props>()
     <BaseButton
       variant="secondary"
       size="sm"
-      class="!bg-transparent hover:!bg-transparent hover:!text-indigo-600"
+      class="!bg-transparent hover:!bg-transparent hover:!text-primary"
       :disabled="currentPage === totalPages"
       @click="handleLastPage"
     >

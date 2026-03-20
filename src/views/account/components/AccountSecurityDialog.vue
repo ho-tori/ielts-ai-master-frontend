@@ -16,7 +16,7 @@
           placeholder="请输入手机号"
           required
         />
-        <p v-if="errors.phone" class="text-red-600 text-sm mt-1">{{ errors.phone }}</p>
+        <p v-if="errors.phone" class="text-danger text-sm mt-1">{{ errors.phone }}</p>
       </div>
 
       <div>
@@ -31,7 +31,7 @@
           required
           @toggle-password="showPassword = !showPassword"
         />
-        <p v-if="errors.password" class="text-red-600 text-sm mt-1">{{ errors.password }}</p>
+        <p v-if="errors.password" class="text-danger text-sm mt-1">{{ errors.password }}</p>
       </div>
 
       <div>
@@ -46,7 +46,7 @@
           required
           @toggle-password="showConfirmPassword = !showConfirmPassword"
         />
-        <p v-if="errors.confirmPassword" class="text-red-600 text-sm mt-1">{{ errors.confirmPassword }}</p>
+        <p v-if="errors.confirmPassword" class="text-danger text-sm mt-1">{{ errors.confirmPassword }}</p>
       </div>
     </div>
   </BaseDialog>

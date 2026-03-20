@@ -10,6 +10,7 @@ type InputMode = 'form' | 'json'
 const loading = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
+// 双模式输入：支持表单编辑和 JSON 直接编辑。
 const inputMode = ref<InputMode>('form')
 const jsonPayload = ref(`{
   "title": "Sample Article",
@@ -106,6 +107,7 @@ function resetForm() {
 }`
 }
 
+// 从表单状态构建 API 请求体，并对每道题做归一化处理。
 function buildPayloadFromForm(): UploadArticlePayload {
   return {
     title: form.title.trim(),
@@ -130,6 +132,7 @@ function buildPayloadFromForm(): UploadArticlePayload {
   }
 }
 
+// 在提交前解析并校验 JSON 模式下的请求体。
 function parseJsonPayload(): UploadArticlePayload {
   let parsed: any
   try {
@@ -155,6 +158,7 @@ function parseJsonPayload(): UploadArticlePayload {
   return parsed as UploadArticlePayload
 }
 
+// 将当前表单内容转换为格式化 JSON，便于复制或继续编辑。
 function syncFormToJson() {
   errorMessage.value = ''
   successMessage.value = ''
@@ -163,6 +167,7 @@ function syncFormToJson() {
   successMessage.value = '已将表单内容转换为 JSON'
 }
 
+// 解析 JSON 并回填到表单控件，便于可视化编辑。
 function syncJsonToForm() {
   errorMessage.value = ''
   successMessage.value = ''
@@ -214,6 +219,7 @@ async function handleSubmit() {
 
   let payload: UploadArticlePayload
 
+  // 根据当前输入模式决定 payload 来源。
   if (inputMode.value === 'form') {
     if (!form.title.trim() || !form.content.trim()) {
       errorMessage.value = '标题和正文不能为空'
@@ -237,6 +243,7 @@ async function handleSubmit() {
 
   loading.value = true
   try {
+    // 统一上传入口：后端模式或 mock 模式由 api/article.ts 内部处理。
     const { data } = await uploadArticle(payload)
     if (data.code !== 0) {
       throw new Error(data.message || '上传失败')
@@ -256,14 +263,15 @@ async function handleSubmit() {
   <BaseCard>
     <template #header>
       <div>
-        <h2 class="text-2xl font-bold text-slate-900 mb-1">管理员文章上传</h2>
-        <p class="text-slate-600 text-sm">按 Article 类型录入文章，提交后可在阅读模块使用。</p>
+        <h2 class="text-2xl font-bold text-text-primary mb-1">管理员文章上传</h2>
+        <p class="text-text-secondary text-sm">按 Article 类型录入文章，提交后可在阅读模块使用。</p>
       </div>
     </template>
 
     <form class="space-y-6" @submit.prevent="handleSubmit">
+      <!-- 模式切换与互转操作 -->
       <div class="flex flex-wrap items-center gap-2">
-        <div class="flex items-center gap-2 rounded-xl bg-slate-100 p-1 w-fit">
+        <div class="flex items-center gap-2 rounded-xl bg-surface-muted p-1 w-fit">
           <BaseButton
             type="button"
             size="sm"
@@ -290,6 +298,7 @@ async function handleSubmit() {
         </BaseButton>
       </div>
 
+      <!-- 表单编辑模式 -->
       <template v-if="inputMode === 'form'">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <BaseInput v-model="form.title" label="标题" placeholder="请输入文章标题" />
@@ -322,7 +331,7 @@ async function handleSubmit() {
 
       <div class="space-y-4">
         <div class="flex items-center justify-between">
-          <h3 class="font-semibold text-slate-800">题目列表</h3>
+          <h3 class="font-semibold text-text-primary">题目列表</h3>
           <BaseButton type="button" size="sm" @click="addQuestion">新增题目</BaseButton>
         </div>
 
@@ -340,6 +349,7 @@ async function handleSubmit() {
       </div>
       </template>
 
+      <!-- 原始 JSON 编辑模式 -->
       <template v-else>
         <BaseTextarea
           v-model="jsonPayload"
@@ -350,12 +360,14 @@ async function handleSubmit() {
         />
       </template>
 
-      <div class="rounded-xl border border-slate-200 p-4 bg-slate-50">
-        <p v-if="successMessage" class="text-green-700 text-sm">{{ successMessage }}</p>
-        <p v-if="errorMessage" class="text-red-700 text-sm">{{ errorMessage }}</p>
-        <p v-if="!successMessage && !errorMessage" class="text-slate-500 text-sm">提交后将自动生成文章 ID、字数和阅读时长。</p>
+      <!-- 两种模式共用的状态提示区域 -->
+      <div class="rounded-xl border border-border p-4 bg-surface-muted">
+        <p v-if="successMessage" class="text-success text-sm">{{ successMessage }}</p>
+        <p v-if="errorMessage" class="text-danger text-sm">{{ errorMessage }}</p>
+        <p v-if="!successMessage && !errorMessage" class="text-text-secondary text-sm">提交后将自动生成文章 ID、字数和阅读时长。</p>
       </div>
 
+      <!-- 主要操作按钮 -->
       <div class="flex items-center gap-3">
         <BaseButton type="submit" :loading="loading">提交文章</BaseButton>
         <BaseButton type="button" variant="secondary" @click="resetForm">重置表单</BaseButton>

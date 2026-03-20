@@ -46,22 +46,22 @@ watch(
 <template>
   <BaseCard>
   <template #header>
-      <h3 class="font-semibold text-slate-800">AI 辅助面板</h3>
+      <h3 class="font-semibold text-text-primary">AI 辅助面板</h3>
     </template>
   <div class="space-y-4">
     <!-- 未选择 -->
     <div
       v-if="!selection.text"
-      class="text-slate-400 text-center flex-1 flex items-center justify-center"
+      class="text-text-secondary/70 text-center flex-1 flex items-center justify-center"
     >
       在左侧文中划词，获取 AI 深度解析
     </div>
 
     <!-- 已选择 -->
     <div v-else class="flex-1 flex flex-col gap-4">
-      <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
-        <p class="text-xs font-bold text-indigo-700 mb-2">选中内容</p>
-        <p class="text-sm italic text-slate-600">
+      <div class="p-4 bg-primary/10 rounded-xl border border-primary/20">
+        <p class="text-xs font-bold text-primary mb-2">选中内容</p>
+        <p class="text-sm italic text-text-secondary">
           "{{ selection.text }}"
         </p>
       </div>
@@ -78,15 +78,15 @@ watch(
       <!-- AI 返回结果 -->
       <div v-if="result" class="mt-2 space-y-4">
         <div>
-          <p class="font-semibold mb-1">句子解析</p>
-          <p class="text-sm text-slate-700">
+          <p class="font-semibold mb-1 text-text-primary">句子解析</p>
+          <p class="text-sm text-text-secondary">
             {{ result.explanation }}
           </p>
         </div>
 
         <div>
-          <p class="font-semibold mb-1">核心词汇</p>
-          <ul class="text-sm text-slate-700 list-disc pl-5">
+          <p class="font-semibold mb-1 text-text-primary">核心词汇</p>
+          <ul class="text-sm text-text-secondary list-disc pl-5">
             <li v-for="v in result.vocab" :key="v.word">
               <strong>{{ v.word }}</strong>：{{ v.meaning }}
             </li>
