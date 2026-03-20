@@ -52,14 +52,16 @@ export interface ArticleListItem {
 export interface RecentArticle {
 	id: number
 	title: string
-	category: string
+	category?: string
+	examType?: string
 	readDate?: string
 }
 
 export interface Exercise {
 	id: number
 	title: string
-	examType: string
+	category: 'news' | 'academic' | 'fiction'
+	examType?: string
 	difficulty: string
 	description: string
 	tags: string[]

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { Icon } from '@iconify/vue';
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
+import SidebarNavItem from './components/SidebarNavItem.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -18,7 +18,7 @@ const menuItems = [
 
 const visibleMenuItems = computed(() => {
   const items = [...menuItems]
-  if (userStore.isAdmin) {
+  if (userStore.user?.username === 'admin') {
     items.push({ name: 'Admin', path: '/admin/upload', icon: 'heroicons:shield-check' })
   }
   return items
@@ -31,45 +31,30 @@ function goAccount() {
 
 <template>
   <!-- 左侧侧边栏 - 快捷功能 -->
-  <aside class="w-20 bg-white border-r border-slate-200 flex flex-col items-center py-8 shrink-0">
+  <aside class="w-20 bg-surface border-r border-border flex flex-col items-center py-8 shrink-0">
     
     <!-- 菜单项容器 -->
     <div class="space-y-8">
       <!-- 循环渲染菜单按钮 -->
-      <router-link
+      <SidebarNavItem
         v-for="item in visibleMenuItems"
         :key="item.path"
         :to="item.path"
-        class="p-3 rounded-2xl transition-all group relative block"
-        :class="[
-          route.path === item.path 
-            ? 'bg-indigo-50 text-indigo-600 shadow-sm' 
-            : 'text-slate-400 hover:text-indigo-600 hover:bg-slate-50'
-        ]"
-      >
-        <Icon :icon="item.icon" class="text-2xl" />
-        
-        <!-- 悬浮文字提示 (Tooltip) - 可选 -->
-        <span class="absolute left-full ml-4 px-2 py-1 bg-slate-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
-          {{ item.name }}
-        </span>
-      </router-link>
+        :icon="item.icon"
+        :label="item.name"
+        :active="route.path === item.path"
+      />
     </div>
 
     <!-- 底部设置按钮 -->
     <div class="mt-auto">
-      <button 
+      <SidebarNavItem 
         @click="goAccount" 
-        class="p-3 rounded-2xl transition-all"
-        :class="[
-          route.path === '/account'
-            ? 'bg-red-50 text-red-500 shadow-sm'
-            : 'text-slate-400 hover:text-red-500 hover:bg-red-50'
-        ]"
-        title="个人信息"
-      >
-        <Icon icon="heroicons:cog-6-tooth" class="text-2xl" />
-      </button>
+        icon="heroicons:cog-6-tooth"
+        label="个人信息"
+        :active="route.path === '/account'"
+        :danger="true"
+      />
     </div>
   </aside>
 </template>

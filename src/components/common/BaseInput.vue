@@ -1,6 +1,6 @@
 <template>
   <div>
-    <label v-if="label" class="block text-sm font-medium text-slate-700 mb-2">{{ label }}</label>
+    <label v-if="label" class="block text-sm font-medium text-text-secondary mb-2">{{ label }}</label>
     <input
       :value="modelValue"
       :type="inputType"
@@ -8,13 +8,13 @@
       :required="required"
       :minlength="minlength"
       :autocomplete="autocomplete"
-      class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 text-slate-900 placeholder-slate-400 transition-all outline-none"
+      class="w-full px-4 py-3 rounded-lg border border-border bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 text-text-primary placeholder:text-text-secondary/70 transition-all outline-none"
       @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value.trim())"
     />
     <button 
       v-if="type === 'password' && showToggle"
       type="button" 
-      class="text-sm text-indigo-600 hover:text-indigo-700 font-semibold mt-2 transition-colors" 
+      class="text-sm text-primary hover:text-primary-hover font-semibold mt-2 transition-colors" 
       @click="$emit('toggle-password')"
     >
       {{ isPasswordVisible ? '隐藏密码' : '显示密码' }}

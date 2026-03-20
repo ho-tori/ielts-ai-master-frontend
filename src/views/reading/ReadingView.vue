@@ -155,7 +155,7 @@ const handleSubmit = async () => {
   
   questions.forEach(q => {
     const userAnswer = selectedAnswers.value[q.id]
-    if (userAnswer && userAnswer === q.answer) {
+    if (userAnswer && userAnswer === q.correctAnswer) {
       correctCount++
     }
   })
@@ -209,19 +209,19 @@ const currentArticleId = computed(() => {
 
     <div v-if="loading" class="flex items-center justify-center h-full">
       <div class="text-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p class="text-gray-600 mt-4">加载中...</p>
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+        <p class="text-text-secondary mt-4">加载中...</p>
       </div>
     </div>
 
-    <div v-else-if="error" class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-      <p class="text-red-800 text-sm">❌ {{ error }}</p>
+    <div v-else-if="error" class="mb-4 p-4 bg-danger/10 border border-danger/30 rounded-lg">
+      <p class="text-danger text-sm">❌ {{ error }}</p>
     </div>
 
     <div v-if="!loading && !currentArticle && error" class="flex items-center justify-center h-full">
       <div class="text-center">
-        <p class="text-gray-600 mb-2">{{ error }}</p>
-        <p class="text-sm text-gray-500">请检查习题 ID 或返回练习中心重新选择</p>
+        <p class="text-text-secondary mb-2">{{ error }}</p>
+        <p class="text-sm text-text-secondary/80">请检查习题 ID 或返回练习中心重新选择</p>
       </div>
     </div>
 
@@ -239,17 +239,17 @@ const currentArticleId = computed(() => {
       />
 
       <div class="lg:col-span-3 order-2 lg:order-3 h-full flex flex-col gap-4">
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-100">
+        <div class="bg-surface rounded-xl p-4 shadow-sm border border-border/70">
           <div class="flex items-center justify-between mb-2">
-            <span class="text-sm font-medium text-slate-600">答题进度</span>
-            <span class="text-sm font-bold" :class="currentProgressPercent === 100 ? 'text-green-600' : 'text-indigo-600'">
+            <span class="text-sm font-medium text-text-secondary">答题进度</span>
+            <span class="text-sm font-bold" :class="currentProgressPercent === 100 ? 'text-success' : 'text-primary'">
               {{ currentProgressPercent }}%
             </span>
           </div>
-          <div class="w-full bg-slate-100 rounded-full h-2.5">
+          <div class="w-full bg-surface-muted rounded-full h-2.5">
             <div 
               class="h-2.5 rounded-full transition-all duration-300 ease-out"
-              :class="currentProgressPercent === 100 ? 'bg-green-500' : 'bg-indigo-500'"
+              :class="currentProgressPercent === 100 ? 'bg-success' : 'bg-primary'"
               :style="{ width: currentProgressPercent + '%' }"
             ></div>
           </div>

@@ -20,13 +20,13 @@ const handleMouseUp = () => {
 </script>
 
 <template>
-  <div class="bg-slate-50 rounded-2xl p-8 flex flex-col border border-slate-200 overflow-auto">
-    <h3 class="text-2xl font-bold mb-6 text-slate-900 leading-tight">
+  <div class="bg-surface-muted rounded-2xl p-8 flex flex-col border border-border">
+    <h3 class="text-2xl font-bold mb-6 text-text-primary leading-tight">
       {{ title }}
     </h3>
 
     <div
-      class="flex-1 pr-4 leading-relaxed text-slate-700 text-base space-y-4"
+      class="flex-1 pr-4 leading-relaxed text-text-secondary text-base"
       @mouseup="handleMouseUp"
     >
       <div v-for="paragraph in paragraphs" :key="paragraph.paragraphNumber" class="paragraph-block">

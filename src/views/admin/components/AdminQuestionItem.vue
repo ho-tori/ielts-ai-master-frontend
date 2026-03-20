@@ -1,21 +1,34 @@
 <script setup lang="ts">
-import type { Question } from '@/types/article'
 import { BaseButton, BaseInput, BaseSelect, BaseTextarea } from '@/components'
 
-type QuestionType = 'TRUE_FALSE_NOT_GIVEN' | 'MULTIPLE_CHOICE'
+interface QuestionOption {
+  label: string
+  content: string
+}
+
+interface AdminQuestion {
+  questionNumber: number
+  questionTypeCode: 'single_choice' | 'judgment'
+  stem: string
+  options?: QuestionOption[]
+  correctAnswer: string
+  analysis?: string
+  answerParagraphNumber: number
+  answerSentenceIndex: number
+}
 
 const props = defineProps<{
-  modelValue: Question
+  modelValue: AdminQuestion
   index: number
   canRemove: boolean
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: Question): void
+  (e: 'update:modelValue', value: AdminQuestion): void
   (e: 'remove'): void
 }>()
 
-function updateField<K extends keyof Question>(key: K, value: Question[K]) {
+function updateField<K extends keyof AdminQuestion>(key: K, value: AdminQuestion[K]) {
   emit('update:modelValue', {
     ...props.modelValue,
     [key]: value
@@ -23,80 +36,93 @@ function updateField<K extends keyof Question>(key: K, value: Question[K]) {
 }
 
 function onTypeChange(value: string) {
-  const nextType = value as QuestionType
-  if (nextType === 'MULTIPLE_CHOICE') {
+  const questionTypeCode = value as AdminQuestion['questionTypeCode']
+  if (questionTypeCode === 'single_choice') {
     emit('update:modelValue', {
       ...props.modelValue,
-      type: nextType,
-      options: props.modelValue.options && props.modelValue.options.length > 0 ? props.modelValue.options : ['', '', '', ''],
-      answer: props.modelValue.answer || 'A'
+      questionTypeCode,
+      options: props.modelValue.options && props.modelValue.options.length > 0
+        ? props.modelValue.options
+        : [
+            { label: 'A', content: '' },
+            { label: 'B', content: '' },
+            { label: 'C', content: '' },
+            { label: 'D', content: '' }
+          ],
+      correctAnswer: ['A', 'B', 'C', 'D'].includes(props.modelValue.correctAnswer) ? props.modelValue.correctAnswer : 'A'
     })
     return
   }
 
   emit('update:modelValue', {
     ...props.modelValue,
-    type: nextType,
+    questionTypeCode,
     options: undefined,
-    answer: props.modelValue.answer || 'TRUE'
+    correctAnswer: ['TRUE', 'FALSE', 'NOT GIVEN'].includes(props.modelValue.correctAnswer)
+      ? props.modelValue.correctAnswer
+      : 'TRUE'
   })
 }
 
 function updateOption(index: number, value: string) {
-  const options = [...(props.modelValue.options || ['', '', '', ''])]
-  options[index] = value
+  const defaults = [
+    { label: 'A', content: '' },
+    { label: 'B', content: '' },
+    { label: 'C', content: '' },
+    { label: 'D', content: '' }
+  ]
+  const options = [...(props.modelValue.options || defaults)]
+  const fallback = { label: String.fromCharCode(65 + index), content: '' }
+  const base = options[index] || defaults[index] || fallback
+  options[index] = { label: base.label, content: value }
   updateField('options', options)
-}
-
-function selectChoiceAnswer(value: string) {
-  updateField('answer', value)
 }
 </script>
 
 <template>
-  <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/60 space-y-3">
+  <div class="p-4 rounded-xl border border-border bg-surface-muted/60 space-y-3">
     <div class="flex items-center justify-between">
-      <p class="text-sm font-semibold text-slate-700">题目 {{ index + 1 }}</p>
+      <p class="text-sm font-semibold text-text-secondary">题目 {{ index + 1 }}</p>
       <BaseButton variant="danger" size="sm" :disabled="!canRemove" @click="emit('remove')">删除</BaseButton>
     </div>
 
     <BaseSelect
       label="题型"
-      :model-value="modelValue.type"
+      :model-value="modelValue.questionTypeCode"
       @update:model-value="onTypeChange"
     >
-      <option value="MULTIPLE_CHOICE">MULTIPLE_CHOICE</option>
-      <option value="TRUE_FALSE_NOT_GIVEN">TRUE_FALSE_NOT_GIVEN</option>
+      <option value="single_choice">single_choice</option>
+      <option value="judgment">judgment</option>
     </BaseSelect>
 
     <BaseTextarea
-      :model-value="modelValue.questionText"
+      :model-value="modelValue.stem"
       label="题干"
       :rows="3"
       min-height-class="min-h-[88px]"
-      @update:model-value="(value) => updateField('questionText', value)"
+      @update:model-value="(value) => updateField('stem', value)"
     />
 
-    <div v-if="modelValue.type === 'MULTIPLE_CHOICE'" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+    <div v-if="modelValue.questionTypeCode === 'single_choice'" class="grid grid-cols-1 md:grid-cols-2 gap-3">
       <BaseInput
-        v-for="(option, i) in (modelValue.options || ['', '', '', ''])"
+        v-for="(option, i) in (modelValue.options || [])"
         :key="i"
-        :model-value="option"
-        :label="`选项 ${String.fromCharCode(65 + i)}`"
+        :model-value="option.content"
+        :label="`选项 ${option.label}`"
         @update:model-value="(value) => updateOption(i, value)"
       />
     </div>
 
-    <div v-if="modelValue.type === 'MULTIPLE_CHOICE'">
-      <label class="block text-sm font-medium text-slate-700 mb-2">标准答案</label>
+    <div v-if="modelValue.questionTypeCode === 'single_choice'">
+      <label class="block text-sm font-medium text-text-secondary mb-2">标准答案</label>
       <div class="grid grid-cols-4 gap-2">
         <BaseButton
           v-for="choice in ['A', 'B', 'C', 'D']"
           :key="choice"
           type="button"
           size="sm"
-          :variant="modelValue.answer === choice ? 'primary' : 'secondary'"
-          @click="selectChoiceAnswer(choice)"
+          :variant="modelValue.correctAnswer === choice ? 'primary' : 'secondary'"
+          @click="updateField('correctAnswer', choice)"
         >
           {{ choice }}
         </BaseButton>
@@ -104,15 +130,15 @@ function selectChoiceAnswer(value: string) {
     </div>
 
     <div v-else>
-      <label class="block text-sm font-medium text-slate-700 mb-2">标准答案</label>
+      <label class="block text-sm font-medium text-text-secondary mb-2">标准答案</label>
       <div class="grid grid-cols-3 gap-2">
         <BaseButton
           v-for="choice in ['TRUE', 'FALSE', 'NOT GIVEN']"
           :key="choice"
           type="button"
           size="sm"
-          :variant="modelValue.answer === choice ? 'primary' : 'secondary'"
-          @click="selectChoiceAnswer(choice)"
+          :variant="modelValue.correctAnswer === choice ? 'primary' : 'secondary'"
+          @click="updateField('correctAnswer', choice)"
         >
           {{ choice }}
         </BaseButton>
@@ -120,11 +146,24 @@ function selectChoiceAnswer(value: string) {
     </div>
 
     <BaseTextarea
-      :model-value="modelValue.explanation || ''"
+      :model-value="modelValue.analysis || ''"
       label="解析（可选）"
       :rows="3"
       min-height-class="min-h-[72px]"
-      @update:model-value="(value) => updateField('explanation', value)"
+      @update:model-value="(value) => updateField('analysis', value)"
     />
+
+    <div class="grid grid-cols-2 gap-3">
+      <BaseInput
+        :model-value="String(modelValue.answerParagraphNumber)"
+        label="答案段落号"
+        @update:model-value="(value) => updateField('answerParagraphNumber', Number(value) || 1)"
+      />
+      <BaseInput
+        :model-value="String(modelValue.answerSentenceIndex)"
+        label="答案句子索引"
+        @update:model-value="(value) => updateField('answerSentenceIndex', Number(value) || 0)"
+      />
+    </div>
   </div>
 </template>

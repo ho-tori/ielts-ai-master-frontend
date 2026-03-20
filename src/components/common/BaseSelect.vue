@@ -1,6 +1,6 @@
 <template>
   <div>
-    <label v-if="label" class="block text-sm font-medium text-slate-700 mb-2">
+    <label v-if="label" class="block text-sm font-medium text-text-secondary mb-2">
       {{ label }}
     </label>
     <select 
@@ -32,7 +32,7 @@ defineEmits<{
 }>()
 
 const selectClass = computed(() => 
-  'w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 text-slate-900 transition-all outline-none'
+  'w-full px-4 py-3 rounded-lg border border-border bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 text-text-primary transition-all outline-none'
 )
 </script>
 

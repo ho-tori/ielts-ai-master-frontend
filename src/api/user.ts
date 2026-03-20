@@ -22,6 +22,12 @@ function buildFallbackMockUser(username: string): User {
 	}
 }
 
+let mockCurrentUser: User = {
+	id: 'mock_profile_user',
+	username: 'mock_user',
+	nickname: 'Mock User'
+}
+
 export function apiLogin(data: LoginPayload) {
 	if (mockAuthEnabled) {
 		const fallbackUser = buildFallbackMockUser(data.username)
@@ -49,21 +55,30 @@ export function apiRegister(data: RegisterPayload) {
 
 export function apiProfile() {
 	if (mockAuthEnabled) {
-		const user: User = {
-			id: 'mock_profile_user',
-			username: 'mock_user',
-			nickname: 'Mock User',
-		}
-		return mockResponse<LoginResponse['user']>(user, 'mock profile success')
+		return mockResponse<LoginResponse['user']>(mockCurrentUser, 'mock profile success')
 	}
 
 	return request.get<ApiResponse<LoginResponse['user']>>('/auth/profile')
 }
 
 export function apiUpdateProfile(data: EditProfilePayload) {
+	if (mockAuthEnabled) {
+		mockCurrentUser = {
+			...mockCurrentUser,
+			nickname: data.nickname || mockCurrentUser.nickname,
+			email: data.email || mockCurrentUser.email,
+			avatar: data.avatar || mockCurrentUser.avatar
+		}
+		return mockResponse<LoginResponse['user']>(mockCurrentUser, 'mock profile update success')
+	}
+
 	return request.put<ApiResponse<LoginResponse['user']>>('/auth/profile', data)
 }
 
 export function apiUpdateSecurity(data: AccountSecurityPayload) {
+	if (mockAuthEnabled) {
+		return mockResponse<LoginResponse['user']>(mockCurrentUser, `mock security update success: ${data.password ? 'ok' : 'noop'}`)
+	}
+
 	return request.put<ApiResponse<LoginResponse['user']>>('/auth/security', data)
 }

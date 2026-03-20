@@ -24,39 +24,39 @@ const categoryLabel = (category: string): string => {
 
 const categoryColor = (category: string): string => {
   const colors: Record<string, string> = {
-    'news': 'bg-blue-50 border-blue-200',
-    'academic': 'bg-indigo-50 border-indigo-200',
-    'fiction': 'bg-purple-50 border-purple-200'
+    'news': 'bg-surface-muted border-border',
+    'academic': 'bg-surface-muted border-border',
+    'fiction': 'bg-surface-muted border-border'
   }
-  return colors[category] || 'bg-gray-50 border-gray-200'
+  return colors[category] || 'bg-surface-muted border-border'
 }
 
 const getBorderClass = (category: string, isActive: boolean): string => {
   if (isActive) {
-    return 'border border-indigo-200 ring-2 ring-indigo-400'
+    return 'border border-primary/30 ring-2 ring-primary/40'
   }
   const colors: Record<string, string> = {
-    'news': 'border border-blue-200',
-    'academic': 'border border-indigo-200',
-    'fiction': 'border border-purple-200'
+    'news': 'border border-border',
+    'academic': 'border border-border',
+    'fiction': 'border border-border'
   }
-  return colors[category] || 'border border-gray-200'
+  return colors[category] || 'border border-border'
 }
 
 const categoryBadgeColor = (category: string): string => {
   const colors: Record<string, string> = {
-    'news': 'bg-blue-100 text-blue-800',
-    'academic': 'bg-indigo-100 text-indigo-800',
-    'fiction': 'bg-purple-100 text-purple-800'
+    'news': 'bg-surface text-text-secondary border border-border',
+    'academic': 'bg-primary/10 text-primary border border-primary/20',
+    'fiction': 'bg-surface text-text-secondary border border-border'
   }
-  return colors[category] || 'bg-gray-100 text-gray-800'
+  return colors[category] || 'bg-surface text-text-secondary border border-border'
 }
 </script>
 
 <template>
   <div v-if="articles.length > 0" class="mb-6">
     <div class="mb-3">
-      <h3 class="text-sm font-semibold text-slate-900">最近阅读</h3>
+      <h3 class="text-sm font-semibold text-text-primary">最近阅读</h3>
     </div>
     
     <div class="overflow-x-auto pb-2 -mx-4 px-4 pt-2">
@@ -65,21 +65,21 @@ const categoryBadgeColor = (category: string): string => {
           v-for="(article, index) in articles"
           :key="article.id"
           @click="$emit('select', String(article.id))"
-          :class="[categoryColor(article.category), getBorderClass(article.category, activeArticleId === String(article.id))]"
+          :class="[categoryColor(article.category || 'academic'), getBorderClass(article.category || 'academic', activeArticleId === String(article.id))]"
           class="flex-shrink-0 w-64 p-3 rounded-lg cursor-pointer transition"
         >
           <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-2">
-              <span class="inline-block w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center">
+              <span class="inline-block w-6 h-6 rounded-full bg-text-primary text-white text-xs font-bold flex items-center justify-center">
                 {{ index + 1 }}
               </span>
             </div>
-            <span :class="categoryBadgeColor(article.category)" class="text-xs font-medium px-2 py-1 rounded">
-              {{ categoryLabel(article.category) }}
+            <span :class="categoryBadgeColor(article.category || 'academic')" class="text-xs font-medium px-2 py-1 rounded">
+              {{ categoryLabel(article.category || 'academic') }}
             </span>
           </div>
 
-          <h4 class="text-sm font-semibold text-slate-900 line-clamp-2 mb-2">
+          <h4 class="text-sm font-semibold text-text-primary line-clamp-2 mb-2">
             {{ article.title }}
           </h4>
         </div>
@@ -91,7 +91,7 @@ const categoryBadgeColor = (category: string): string => {
 <style scoped>
 .overflow-x-auto {
   scrollbar-width: thin;
-  scrollbar-color: #c7d2fe transparent;
+  scrollbar-color: rgb(var(--color-primary) / 0.4) transparent;
 }
 
 .overflow-x-auto::-webkit-scrollbar {
@@ -104,12 +104,12 @@ const categoryBadgeColor = (category: string): string => {
 }
 
 .overflow-x-auto::-webkit-scrollbar-thumb {
-  background: #c7d2fe;
+  background: rgb(var(--color-primary) / 0.4);
   border-radius: 3px;
   transition: background 0.2s;
 }
 
 .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-  background: #818cf8;
+  background: rgb(var(--color-primary));
 }
 </style>

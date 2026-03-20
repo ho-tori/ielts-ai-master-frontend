@@ -17,7 +17,7 @@
           :minlength="6"
           required
         />
-        <p v-if="errors.password" class="text-red-600 text-sm mt-1">{{ errors.password }}</p>
+        <p v-if="errors.password" class="text-danger text-sm mt-1">{{ errors.password }}</p>
       </div>
       
       <div>
@@ -29,7 +29,7 @@
           :minlength="6"
           required
         />
-        <p v-if="errors.confirmPassword" class="text-red-600 text-sm mt-1">{{ errors.confirmPassword }}</p>
+        <p v-if="errors.confirmPassword" class="text-danger text-sm mt-1">{{ errors.confirmPassword }}</p>
       </div>
     </div>
   </BaseDialog>

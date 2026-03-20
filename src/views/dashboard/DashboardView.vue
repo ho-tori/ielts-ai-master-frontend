@@ -4,8 +4,8 @@
     <BaseCard>
       <div class="flex items-center justify-between">
         <div>
-          <h2 class="text-2xl font-bold text-slate-800">欢迎回来！</h2>
-          <p class="text-slate-500 mt-1">继续你的雅思阅读之旅</p>
+          <h2 class="text-2xl font-bold text-text-primary">欢迎回来！</h2>
+          <p class="text-text-secondary mt-1">继续你的雅思阅读之旅</p>
         </div>
         <div class="text-5xl">📚</div>
       </div>
@@ -15,20 +15,20 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <BaseCard>
         <div class="text-center">
-          <div class="text-3xl font-bold text-indigo-600">{{ totalArticles }}</div>
-          <p class="text-slate-500 text-sm mt-2">已完成文章</p>
+          <div class="text-3xl font-bold text-primary">{{ totalArticles }}</div>
+          <p class="text-text-secondary text-sm mt-2">已完成文章</p>
         </div>
       </BaseCard>
       <BaseCard>
         <div class="text-center">
-          <div class="text-3xl font-bold text-emerald-600">{{ totalVocab }}</div>
-          <p class="text-slate-500 text-sm mt-2">掌握词汇</p>
+          <div class="text-3xl font-bold text-success">{{ totalVocab }}</div>
+          <p class="text-text-secondary text-sm mt-2">掌握词汇</p>
         </div>
       </BaseCard>
       <BaseCard>
         <div class="text-center">
-          <div class="text-3xl font-bold text-amber-600">{{ streakDays }}</div>
-          <p class="text-slate-500 text-sm mt-2">连续学习天数</p>
+          <div class="text-3xl font-bold text-success">{{ streakDays }}</div>
+          <p class="text-text-secondary text-sm mt-2">连续学习天数</p>
         </div>
       </BaseCard>
     </div>
@@ -36,12 +36,12 @@
     <!-- Recent Articles -->
     <BaseCard>
       <template #header>
-        <h3 class="font-bold text-slate-800">最近练习 <span class="text-xs text-slate-400 font-normal">（最近5条）</span></h3>
+        <h3 class="font-bold text-text-primary">最近练习 <span class="text-xs text-text-secondary/70 font-normal">（最近5条）</span></h3>
       </template>
       <div v-if="loading" class="flex justify-center py-4">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
-      <div v-else-if="recentArticles.length === 0" class="text-center py-4 text-slate-500">
+      <div v-else-if="recentArticles.length === 0" class="text-center py-4 text-text-secondary">
         暂无最近练习记录
       </div>
       <div v-else class="space-y-2">
@@ -49,10 +49,10 @@
           v-for="article in recentArticles"
           :key="String(article.id)"
           to="/reading"
-          class="block p-3 rounded-lg hover:bg-slate-50 transition-colors border border-slate-100"
+          class="block p-3 rounded-lg hover:bg-surface-muted transition-colors border border-border/70"
         >
-          <p class="font-medium text-slate-800">{{ article.title }}</p>
-          <p class="text-xs text-slate-500 mt-1">{{ article.category }}</p>
+          <p class="font-medium text-text-primary">{{ article.title }}</p>
+          <p class="text-xs text-text-secondary mt-1">{{ article.examType }}</p>
         </router-link>
       </div>
     </BaseCard>
@@ -66,19 +66,20 @@ import { getArticleDetail } from '@/api/article'
 import { apiGetUserStats } from '@/api/stats'
 import { BaseCard } from '@/components'
 import type { Article } from '@/types/article'
+import type { UserStats } from '@/types/user'
 
 const userStore = useUserStore()
 const loading = ref(false)
 const recentArticlesData = ref<Article[]>([])
-const stats = ref({
-  totalArticles: 0,
-  totalVocabulary: 0,
-  streakDays: 0
+const stats = ref<UserStats>({
+  totalArticlesRead: 0,
+  totalQuestionsAnswered: 0,
+  correctRate: 0
 })
 
-const totalArticles = computed(() => stats.value.totalArticles)
-const totalVocab = computed(() => stats.value.totalVocabulary)
-const streakDays = computed(() => stats.value.streakDays)
+const totalArticles = computed(() => stats.value.totalArticlesRead)
+const totalVocab = computed(() => stats.value.totalQuestionsAnswered)
+const streakDays = computed(() => stats.value.correctRate)
 
 const recentArticles = computed(() => {
   return recentArticlesData.value.slice(0, 5)

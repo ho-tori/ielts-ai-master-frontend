@@ -2,7 +2,7 @@
   <BaseCard>
     <template #header>
       <div class="flex items-center justify-between">
-        <h3 class="font-semibold text-slate-800">Questions</h3>
+        <h3 class="font-semibold text-text-primary">Questions</h3>
         <span v-if="showResults" class="text-sm font-bold" :class="scoreClass">
           得分: {{ score }}%
         </span>
@@ -62,7 +62,7 @@
           <p class="text-lg font-bold" :class="scoreClass">
             {{ score >= 60 ? '🎉 恭喜通过！' : '💪 继续加油！' }}
           </p>
-          <p class="text-sm text-slate-600">正确率: {{ score }}%</p>
+          <p class="text-sm text-text-secondary">正确率: {{ score }}%</p>
         </div>
         <BaseButton 
           @click="resetQuiz"
@@ -120,6 +120,8 @@ function resetQuiz() {
   emit('reset')
 }
 
+type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'ghost' | 'danger' | 'success'
+
 const score = computed(() => {
   if (!props.showResults) return 0
   let correct = 0
@@ -132,18 +134,18 @@ const score = computed(() => {
 })
 
 const scoreClass = computed(() => {
-  if (score.value >= 80) return 'text-green-600'
-  if (score.value >= 60) return 'text-yellow-600'
-  return 'text-red-600'
+  if (score.value >= 80) return 'text-success'
+  if (score.value >= 60) return 'text-primary'
+  return 'text-danger'
 })
 
 const scoreBgClass = computed(() => {
-  if (score.value >= 80) return 'bg-green-50'
-  if (score.value >= 60) return 'bg-yellow-50'
-  return 'bg-red-50'
+  if (score.value >= 80) return 'bg-success/10'
+  if (score.value >= 60) return 'bg-primary/10'
+  return 'bg-danger/10'
 })
 
-function getButtonVariant(questionId: number, option: string, correctAnswer?: string): string {
+function getButtonVariant(questionId: number, option: string, correctAnswer?: string): ButtonVariant {
   const userAnswer = selectedAnswers.value[questionId]
   
   if (props.showResults) {

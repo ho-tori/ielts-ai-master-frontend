@@ -1,6 +1,6 @@
 <template>
-  <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-100 transition-all cursor-pointer group" @click="$emit('select', sentence)">
-    <p class="text-slate-700 leading-relaxed text-sm group-hover:text-indigo-600 transition-colors">
+  <div class="p-3 bg-surface-muted rounded-lg border border-border hover:border-primary/30 hover:bg-surface transition-all cursor-pointer group" @click="$emit('select', sentence)">
+    <p class="text-text-secondary leading-relaxed text-sm group-hover:text-primary transition-colors">
       {{ sentence }}
     </p>
   </div>

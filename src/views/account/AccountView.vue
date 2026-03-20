@@ -3,12 +3,12 @@
     <BaseCard>
       <template #header>
         <div class="flex items-center justify-between">
-          <h2 class="text-lg font-semibold text-slate-800">个人中心</h2>
-          <Icon icon="solar:settings-linear" class="text-slate-500 text-xl" />
+          <h2 class="text-lg font-semibold text-text-primary">个人中心</h2>
+          <Icon icon="solar:settings-linear" class="text-text-secondary text-xl" />
         </div>
       </template>
       <div class="flex flex-col items-center">
-        <div class="w-24 h-24 rounded-full bg-indigo-50 border-4 border-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-2xl">
+        <div class="w-24 h-24 rounded-full bg-primary/10 border-4 border-primary/20 flex items-center justify-center text-primary font-bold text-2xl">
           {{ initials }}
         </div>
         <h3 class="mt-3 text-xl font-bold text-slate-800">{{ user?.nickname || user?.username || '用户' }}</h3>
@@ -30,32 +30,31 @@
         <span class="text-slate-400 text-[11px] uppercase tracking-wider">正确率</span>
       </div>
     </div>
-
     <BaseCard>
-      <div class="divide-y divide-slate-100">
-        <button class="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors" @click="showEditProfile = true">
+      <div class="divide-y divide-border/70">
+        <button class="w-full flex items-center justify-between p-4 hover:bg-surface-muted transition-colors" @click="showEditProfile = true">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-              <Icon icon="solar:user-circle-linear" class="text-blue-500 text-xl" />
+            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Icon icon="solar:user-circle-linear" class="text-primary text-xl" />
             </div>
             <div class="text-left">
               <p class="text-sm font-semibold text-slate-800">编辑资料</p>
               <p class="text-[11px] text-slate-400">修改昵称、邮箱、头像</p>
             </div>
           </div>
-          <Icon icon="solar:alt-arrow-right-linear" class="text-slate-300" />
+          <Icon icon="solar:alt-arrow-right-linear" class="text-text-secondary/50" />
         </button>
         <button class="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors" @click="showAccountSecurity = true">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
-              <Icon icon="solar:shield-keyhole-linear" class="text-purple-500 text-xl" />
+            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Icon icon="solar:shield-keyhole-linear" class="text-primary text-xl" />
             </div>
             <div class="text-left">
               <p class="text-sm font-semibold text-slate-800">账户安全</p>
               <p class="text-[11px] text-slate-400">修改密码</p>
             </div>
           </div>
-          <Icon icon="solar:alt-arrow-right-linear" class="text-slate-300" />
+          <Icon icon="solar:alt-arrow-right-linear" class="text-text-secondary/50" />
         </button>
       </div>
       <div class="mt-4">
