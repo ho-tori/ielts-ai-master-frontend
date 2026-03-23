@@ -54,7 +54,7 @@ const categoryBadgeColor = (category: string): string => {
 </script>
 
 <template>
-  <div v-if="articles.length > 0" class="mb-6">
+  <div v-if="articles.length > 0" class="mb-2">
     <div class="mb-3">
       <h3 class="text-sm font-semibold text-text-primary">最近阅读</h3>
     </div>
@@ -66,7 +66,7 @@ const categoryBadgeColor = (category: string): string => {
           :key="article.id"
           @click="$emit('select', String(article.id))"
           :class="[categoryColor(article.category || 'academic'), getBorderClass(article.category || 'academic', activeArticleId === String(article.id))]"
-          class="flex-shrink-0 w-64 p-3 rounded-lg cursor-pointer transition"
+          class="flex-shrink-0 w-64 p-3 cursor-pointer transition"
         >
           <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-2">
@@ -74,7 +74,7 @@ const categoryBadgeColor = (category: string): string => {
                 {{ index + 1 }}
               </span>
             </div>
-            <span :class="categoryBadgeColor(article.category || 'academic')" class="text-xs font-medium px-2 py-1 rounded">
+            <span :class="categoryBadgeColor(article.category || 'academic')" class="text-xs font-medium px-2 py-1">
               {{ categoryLabel(article.category || 'academic') }}
             </span>
           </div>

@@ -1,22 +1,29 @@
 <template>
-  <BaseCard>
-    <template #header>
+  <section class="bg-surface">
+    <div class="px-2 py-2">
       <div class="flex items-center justify-between">
         <h3 class="font-semibold text-text-primary">Questions</h3>
         <span v-if="showResults" class="text-sm font-bold" :class="scoreClass">
           得分: {{ score }}%
         </span>
       </div>
-    </template>
-    <div class="space-y-4">
-      <div v-for="(q, idx) in questions" :key="q.id" class="pb-4 border-b border-slate-100 last:border-0">
+    </div>
+    <div class="space-y-4 p-2">
+      <div
+        v-for="(q, idx) in questions"
+        :id="`question-item-${q.id}`"
+        :key="q.id"
+        :class="[
+          'pb-4 border-b border-slate-100 last:border-0 scroll-mt-24 transition-all'
+        ]"
+      >
         <p class="font-medium text-slate-800 mb-3">
           <span class="text-indigo-600">{{ idx + 1 }}.</span> {{ q.stem }}
         </p>
         <div class="space-y-2">
           <BaseButton
             v-if="q.questionTypeCode === 'judgment'"
-            v-for="opt in ['TRUE', 'FALSE']"
+            v-for="opt in ['TRUE', 'FALSE', 'NOT GIVEN']"
             :key="`${q.id}-judgment-${opt}`"
             :variant="getButtonVariant(q.id, opt, q.correctAnswer)"
             block
@@ -51,14 +58,14 @@
             <span v-if="showResults && opt.label === q.correctAnswer" class="ml-2">✓</span>
           </BaseButton>
         </div>
-        <div v-if="showResults && q.analysis" class="mt-2 p-2 bg-slate-50 rounded-lg text-sm text-slate-600">
+        <div v-if="showResults && q.analysis" class="mt-2 p-2 bg-slate-50 text-sm text-slate-600">
           {{ q.analysis }}
         </div>
       </div>
     </div>
-    <template #footer>
+    <div class="px-2 py-3">
       <div v-if="showResults" class="space-y-2">
-        <div class="p-3 rounded-lg text-center" :class="scoreBgClass">
+        <div class="p-3 text-center" :class="scoreBgClass">
           <p class="text-lg font-bold" :class="scoreClass">
             {{ score >= 60 ? '🎉 恭喜通过！' : '💪 继续加油！' }}
           </p>
@@ -80,18 +87,19 @@
       >
         Submit
       </BaseButton>
-    </template>
-  </BaseCard>
+    </div>
+  </section>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import type { Question, QuestionOption } from '../../../types/article'
-import { BaseCard, BaseButton } from '@/components'
+import { BaseButton } from '@/components'
 
 const props = defineProps<{
   questions: Question[]
   showResults?: boolean
+  focusQuestionId?: number | null
 }>()
 
 const emit = defineEmits<{
@@ -101,6 +109,52 @@ const emit = defineEmits<{
 }>()
 
 const selectedAnswers = ref<Record<number, string>>({})
+
+watch(
+  () => props.focusQuestionId,
+  async (questionId) => {
+    if (!questionId) return
+
+    await nextTick()
+    const el = document.getElementById(`question-item-${questionId}`)
+    if (!el) return
+
+    const scrollContainer = findScrollContainer(el)
+    if (!scrollContainer) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      return
+    }
+
+    const containerRect = scrollContainer.getBoundingClientRect()
+    const elementRect = el.getBoundingClientRect()
+    const topGap = 12
+
+    const targetTop =
+      scrollContainer.scrollTop +
+      (elementRect.top - containerRect.top) -
+      topGap
+
+    const maxTop = Math.max(0, scrollContainer.scrollHeight - scrollContainer.clientHeight)
+    const safeTop = Math.min(Math.max(0, targetTop), maxTop)
+
+    scrollContainer.scrollTo({ top: safeTop, behavior: 'smooth' })
+  }
+)
+
+function findScrollContainer(el: HTMLElement): HTMLElement | null {
+  let current: HTMLElement | null = el.parentElement
+
+  while (current) {
+    const style = window.getComputedStyle(current)
+    const isScrollable = /(auto|scroll)/.test(style.overflowY)
+    if (isScrollable && current.scrollHeight > current.clientHeight) {
+      return current
+    }
+    current = current.parentElement
+  }
+
+  return null
+}
 
 function parseMatchOptions(options?: QuestionOption[]): QuestionOption[] {
   return options || []

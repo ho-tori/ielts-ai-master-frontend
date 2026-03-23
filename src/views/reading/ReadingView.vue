@@ -1,21 +1,166 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ArticleSection from './components/ArticleSection.vue'
-import AiResultPanel from './components/AiResultPanel.vue'
-import QuestionPanel from './components/QuestionPanel.vue'
-import RecentArticlesPanel from './components/RecentArticlesPanel.vue'
+import ReadingBottomNavigator from './components/ReadingBottomNavigator.vue'
+import ReadingToolPanel from './components/ReadingToolPanel.vue'
 import { getArticleDetail } from '@/api/article'
 import { useUserStore } from '@/stores/user'
 import type { RecentArticle, Article } from '../../types/article'
 
+// 路由与全局状态
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+
+// 页面基础请求状态
 const error = ref<string | null>(null)
 const loading = ref(false)
 const articleFromApi = ref<Article | null>(null)
 
+// AI 面板的上下文：来自正文选中的文本 + 当前文章标题
+const selectionContext = ref({
+  text: '',
+  articleTitle: ''
+})
+
+// 右侧工具区的状态（最近阅读、答题、笔记、聚焦题目）
+const recentArticlesPanel = ref<RecentArticle[]>([])
+const selectedAnswers = ref<Record<number, string>>({})
+const showResults = ref(false)
+const notes = ref('')
+const focusedQuestionId = ref<number | null>(null)
+
+// 右侧工具栏当前激活的标签
+const activeTool = ref<'questions' | 'translation' | 'ai' | 'notes' | 'recent'>('questions')
+// 工具栏配置（key 用于切换，icon 用于渲染图标）
+const toolItems = [
+  { key: 'questions', label: '题目', icon: 'mdi:format-list-numbered' },
+  { key: 'translation', label: '翻译', icon: 'mdi:translate' },
+  { key: 'ai', label: 'AI解析', icon: 'mdi:robot-outline' },
+  { key: 'notes', label: '笔记', icon: 'mdi:notebook-edit-outline' },
+  { key: 'recent', label: '最近阅读', icon: 'mdi:history' }
+] as const
+
+const splitContainer = ref<HTMLElement | null>(null)
+const isDesktop = ref(false)
+const isResizing = ref(false)
+const rightPaneWidth = ref(420)
+const MIN_RIGHT_PANE = 320
+const MAX_RIGHT_PANE = 620
+const RIGHT_PANE_KEY = 'reading_tool_pane_width'
+
+// 当前文章与题目列表（题目列表用于导航、进度、右侧面板）
+const currentArticle = computed(() => articleFromApi.value)
+const sampleQuestions = computed(() => currentArticle.value?.questions || [])
+
+// 已答题数量：以 selectedAnswers 中的有效值为准
+const answeredCount = computed(() => {
+  return Object.values(selectedAnswers.value).filter((value) => value && value !== '').length
+})
+
+// 答题进度百分比
+const currentProgressPercent = computed(() => {
+  const totalQuestions = sampleQuestions.value.length
+  if (totalQuestions === 0) return 0
+  return Math.round((answeredCount.value / totalQuestions) * 100)
+})
+
+// 右侧工具区宽度样式：仅桌面端启用拖拽宽度
+const rightPaneStyle = computed(() => {
+  if (!isDesktop.value) return {}
+  return { width: `${rightPaneWidth.value}px` }
+})
+
+// 底部题目导航条定位：
+// - 移动端：左右留 16px
+// - 桌面端：左侧避开 sidebar，右侧避开工具区
+const navigatorStyle = computed(() => {
+  if (!isDesktop.value) {
+    return { left: '16px', right: '16px', bottom: '12px' }
+  }
+
+  return {
+    left: '120px',
+    right: `${rightPaneWidth.value + 28}px`,
+    bottom: '14px'
+  }
+})
+
+// 当前文章 ID（用于“最近阅读”高亮）
+const currentArticleId = computed(() => {
+  const articleIdParam = route.query.articleId
+  const exerciseIdParam = route.query.exerciseId
+
+  if (articleIdParam) return String(articleIdParam)
+
+  if (exerciseIdParam) {
+    const exerciseId = Number(exerciseIdParam)
+    if (exerciseId >= 1 && exerciseId <= 12) return String(exerciseId)
+  }
+
+  return undefined
+})
+
+function updateDesktopMode() {
+  isDesktop.value = window.innerWidth >= 1024
+}
+
+// 初始化读取用户上次调整的右侧工具区宽度
+function loadPaneWidth() {
+  const raw = window.localStorage.getItem(RIGHT_PANE_KEY)
+  const width = raw ? Number(raw) : 420
+  if (!Number.isFinite(width)) return
+  rightPaneWidth.value = Math.max(MIN_RIGHT_PANE, Math.min(MAX_RIGHT_PANE, width))
+}
+
+function persistPaneWidth() {
+  window.localStorage.setItem(RIGHT_PANE_KEY, String(rightPaneWidth.value))
+}
+
+// 拖拽分割条：根据鼠标 x 坐标动态计算右侧宽度
+function onResizeMove(event: PointerEvent) {
+  if (!isResizing.value || !splitContainer.value) return
+  const rect = splitContainer.value.getBoundingClientRect()
+  const calculated = rect.right - event.clientX
+  rightPaneWidth.value = Math.max(MIN_RIGHT_PANE, Math.min(MAX_RIGHT_PANE, calculated))
+}
+
+function onResizeUp() {
+  if (!isResizing.value) return
+  isResizing.value = false
+  persistPaneWidth()
+}
+
+function startResize(event: PointerEvent) {
+  if (!isDesktop.value) return
+  event.preventDefault()
+  isResizing.value = true
+}
+
+function resetPaneWidth() {
+  rightPaneWidth.value = 420
+  persistPaneWidth()
+}
+
+// 按“真实题目ID”跳转到右侧题目（用于定位组件内部滚动）
+function jumpToQuestion(questionId: number) {
+  activeTool.value = 'questions'
+  focusedQuestionId.value = null
+  requestAnimationFrame(() => {
+    focusedQuestionId.value = questionId
+  })
+}
+
+// 按“显示序号(1..n)”跳转，先映射回真实题目ID再定位。
+// 这样可以保证 UI 序号与数据库 ID 解耦。
+function jumpToQuestionByOrder(displayOrder: number) {
+  const target = sampleQuestions.value[displayOrder - 1]
+  if (!target) return
+  jumpToQuestion(target.id)
+}
+
+// 拉取文章详情：用于正文显示、题目渲染、最近阅读写入
 const fetchArticleFromApi = async (articleId: number) => {
   loading.value = true
   error.value = null
@@ -36,59 +181,14 @@ const fetchArticleFromApi = async (articleId: number) => {
   }
 }
 
-const currentArticle = computed(() => {
-  return articleFromApi.value
-})
-
-onMounted(() => {
-  const articleIdParam = route.query.articleId
-  const exerciseIdParam = route.query.exerciseId
-  
-  if (articleIdParam) {
-    fetchArticleFromApi(Number(articleIdParam))
-  } else if (exerciseIdParam) {
-    fetchArticleFromApi(Number(exerciseIdParam))
-  }
-})
-
-watch(() => route.query, (newQuery) => {
-  const articleIdParam = newQuery.articleId
-  const exerciseIdParam = newQuery.exerciseId
-  
-  if (articleIdParam) {
-    fetchArticleFromApi(Number(articleIdParam))
-  } else if (exerciseIdParam) {
-    fetchArticleFromApi(Number(exerciseIdParam))
-  } else {
-    articleFromApi.value = null
-  }
-}, { deep: true })
-
-const selectionContext = ref<{
-  text: string
-  articleTitle: string
-}>({
-  text: '',
-  articleTitle: ''
-})
-
-const handleSelect = (text: string) => {
-  if (!currentArticle.value) return
-  selectionContext.value = {
-    text,
-    articleTitle: currentArticle.value.title
-  }
-}
-
-const recentArticlesPanel = ref<RecentArticle[]>([])
-
+// 拉取最近阅读列表：根据 userStore.recentArticles 逐个补全文章详情
 const fetchRecentArticles = async () => {
   const user = userStore.user
   if (!user || !user.recentArticles || user.recentArticles.length === 0) {
     recentArticlesPanel.value = []
     return
   }
-  
+
   try {
     const articles = await Promise.all(
       user.recentArticles.map(async (articleId) => {
@@ -115,98 +215,99 @@ const fetchRecentArticles = async () => {
   }
 }
 
-watch(() => userStore.user, (newUser) => {
-  if (newUser) {
-    fetchRecentArticles()
+// 正文选词回调：更新 AI 分析上下文
+function handleSelect(text: string) {
+  if (!currentArticle.value) return
+  selectionContext.value = {
+    text,
+    articleTitle: currentArticle.value.title
   }
-}, { immediate: true })
+}
 
-const sampleQuestions = computed(() => {
-  return currentArticle.value?.questions || []
-})
-
-const selectedAnswers = ref<Record<number, string>>({})
-
-const currentProgressPercent = computed(() => {
-  const totalQuestions = sampleQuestions.value.length
-  if (totalQuestions === 0) return 0
-  const answeredCount = Object.values(selectedAnswers.value).filter(
-    a => a && a !== ''
-  ).length
-  return Math.round((answeredCount / totalQuestions) * 100)
-})
-
-const updateAnswer = (questionId: number, answer: string) => {
+// 更新某题答案
+function updateAnswer(questionId: number, answer: string) {
   selectedAnswers.value[questionId] = answer
 }
 
-const submitted = ref(false)
-const score = ref(0)
-const showResults = ref(false)
-
-const handleSubmit = async () => {
+// 提交答题：当前仅做前端结果态切换，后续可接入后端评分接口
+function handleSubmit() {
   if (Object.keys(selectedAnswers.value).length === 0) {
     alert('请先回答问题')
     return
   }
-  
-  const questions = sampleQuestions.value
-  let correctCount = 0
-  
-  questions.forEach(q => {
-    const userAnswer = selectedAnswers.value[q.id]
-    if (userAnswer && userAnswer === q.correctAnswer) {
-      correctCount++
-    }
-  })
-  
-  score.value = Math.round((correctCount / questions.length) * 100)
-  submitted.value = true
   showResults.value = true
-  
-  console.log(`提交完成: ${correctCount}/${questions.length} 正确, 得分: ${score.value}%`)
 }
 
-const handleReset = () => {
+// 重置答题状态
+function handleReset() {
   selectedAnswers.value = {}
-  submitted.value = false
   showResults.value = false
-  score.value = 0
 }
 
-const handleSelectRecentArticle = (articleId: string) => {
+// 点击最近阅读卡片后切换文章
+function handleSelectRecentArticle(articleId: string) {
   router.push({ path: '/reading', query: { articleId } })
 }
 
-const currentArticleId = computed(() => {
+onMounted(() => {
+  // 初始化布局状态与拖拽监听
+  updateDesktopMode()
+  loadPaneWidth()
+  window.addEventListener('resize', updateDesktopMode)
+  window.addEventListener('pointermove', onResizeMove)
+  window.addEventListener('pointerup', onResizeUp)
+
+  // 首次进入页面：支持通过 articleId / exerciseId 两种参数打开
   const articleIdParam = route.query.articleId
   const exerciseIdParam = route.query.exerciseId
-  
+
   if (articleIdParam) {
-    return String(articleIdParam)
+    fetchArticleFromApi(Number(articleIdParam))
+  } else if (exerciseIdParam) {
+    fetchArticleFromApi(Number(exerciseIdParam))
   }
-  
-  if (exerciseIdParam) {
-    const exerciseId = Number(exerciseIdParam)
-    if (exerciseId >= 1 && exerciseId <= 12) {
-      return String(exerciseId)
-    }
-  }
-  
-  return undefined
 })
+
+onBeforeUnmount(() => {
+  // 组件销毁时清理全局监听
+  window.removeEventListener('resize', updateDesktopMode)
+  window.removeEventListener('pointermove', onResizeMove)
+  window.removeEventListener('pointerup', onResizeUp)
+})
+
+watch(
+  () => route.query,
+  (newQuery) => {
+    // 路由参数变化时刷新文章，支持页面内切题
+    const articleIdParam = newQuery.articleId
+    const exerciseIdParam = newQuery.exerciseId
+
+    if (articleIdParam) {
+      fetchArticleFromApi(Number(articleIdParam))
+    } else if (exerciseIdParam) {
+      fetchArticleFromApi(Number(exerciseIdParam))
+    } else {
+      articleFromApi.value = null
+    }
+  },
+  { deep: true }
+)
+
+watch(
+  () => userStore.user,
+  (newUser) => {
+    // 登录态变化后刷新最近阅读
+    if (newUser) {
+      fetchRecentArticles()
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
-  <div class="h-full">
-    <RecentArticlesPanel 
-      v-if="recentArticlesPanel.length > 0"
-      :articles="recentArticlesPanel"
-      :active-article-id="currentArticleId"
-      @select="handleSelectRecentArticle"
-      class="mb-6"
-    />
-
+  <div class="h-full" ref="splitContainer">
+    <!-- 加载态 -->
     <div v-if="loading" class="flex items-center justify-center h-full">
       <div class="text-center">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
@@ -214,56 +315,76 @@ const currentArticleId = computed(() => {
       </div>
     </div>
 
+    <!-- 错误态 -->
     <div v-else-if="error" class="mb-4 p-4 bg-danger/10 border border-danger/30 rounded-lg">
       <p class="text-danger text-sm">❌ {{ error }}</p>
     </div>
 
-    <div v-if="!loading && !currentArticle && error" class="flex items-center justify-center h-full">
+    <div v-else-if="!currentArticle && error" class="flex items-center justify-center h-full">
       <div class="text-center">
         <p class="text-text-secondary mb-2">{{ error }}</p>
         <p class="text-sm text-text-secondary/80">请检查习题 ID 或返回练习中心重新选择</p>
       </div>
     </div>
 
-    <div v-else-if="!loading && currentArticle" class="h-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-      <AiResultPanel
-        class="lg:col-span-3 order-3 lg:order-1 h-full"
-        :selection="selectionContext"
-      />
-
-      <ArticleSection
-        class="lg:col-span-6 order-1 lg:order-2 h-full"
-        :title="currentArticle!.title"
-        :paragraphs="currentArticle!.paragraphs"
-        @on-select="handleSelect"
-      />
-
-      <div class="lg:col-span-3 order-2 lg:order-3 h-full flex flex-col gap-4">
-        <div class="bg-surface rounded-xl p-4 shadow-sm border border-border/70">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-sm font-medium text-text-secondary">答题进度</span>
-            <span class="text-sm font-bold" :class="currentProgressPercent === 100 ? 'text-success' : 'text-primary'">
-              {{ currentProgressPercent }}%
-            </span>
-          </div>
-          <div class="w-full bg-surface-muted rounded-full h-2.5">
-            <div 
-              class="h-2.5 rounded-full transition-all duration-300 ease-out"
-              :class="currentProgressPercent === 100 ? 'bg-success' : 'bg-primary'"
-              :style="{ width: currentProgressPercent + '%' }"
-            ></div>
-          </div>
-        </div>
-        
-        <QuestionPanel 
-          class="flex-1 overflow-auto"
-          :questions="sampleQuestions"
-          :show-results="showResults"
-          @update-answer="updateAnswer"
-          @submit="handleSubmit"
-          @reset="handleReset"
+    <!-- 主体：左正文 + 右工具区 -->
+    <div v-else-if="currentArticle" class="h-full flex gap-0">
+      <section class="relative flex-1 min-w-0">
+        <!-- 正文区 -->
+        <ArticleSection
+          class="h-full"
+          :title="currentArticle.title"
+          :paragraphs="currentArticle.paragraphs"
+          @on-select="handleSelect"
         />
-      </div>
+
+        <!-- 固定底部题目导航（按序号跳题） -->
+        <div class="fixed z-20" :style="navigatorStyle">
+          <ReadingBottomNavigator
+            :questions="sampleQuestions"
+            :selected-answers="selectedAnswers"
+            :current-progress-percent="currentProgressPercent"
+            @jump="jumpToQuestionByOrder"
+          />
+        </div>
+      </section>
+
+      <!-- 中间可拖拽分割条 -->
+      <div
+        v-if="isDesktop"
+        class="w-0.5 shrink-0 cursor-col-resize  hover:bg-primary/50 active:bg-primary/100 transition-colors"
+        @pointerdown="startResize"
+        @dblclick="resetPaneWidth"
+      ></div>
+
+      <!-- 右侧工具区（题目/翻译/AI/笔记/最近阅读） -->
+      <ReadingToolPanel
+        :right-pane-style="rightPaneStyle"
+        :active-tool="activeTool"
+        :tool-items="toolItems"
+        :answered-count="answeredCount"
+        :current-progress-percent="currentProgressPercent"
+        :sample-questions="sampleQuestions"
+        :show-results="showResults"
+        :focused-question-id="focusedQuestionId"
+        :selection-context="selectionContext"
+        :current-article="currentArticle"
+        :notes="notes"
+        :recent-articles="recentArticlesPanel"
+        :current-article-id="currentArticleId"
+        @update:active-tool="(value) => (activeTool = value)"
+        @update:notes="(value) => (notes = value)"
+        @update-answer="updateAnswer"
+        @submit="handleSubmit"
+        @reset="handleReset"
+        @select-recent="handleSelectRecentArticle"
+      />
     </div>
   </div>
 </template>
+
+<style scoped>
+.cursor-col-resize {
+  cursor: col-resize;
+}
+</style>

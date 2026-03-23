@@ -2,7 +2,6 @@
 import { ref, watch } from 'vue'
 import { BaseButton } from '@/components'
 import { apiAiAnalyze, type AiAnalyzeResponse } from '@/api/ai'
-import { BaseCard } from '@/components'
 
 const props = defineProps<{
   selection: {
@@ -44,11 +43,11 @@ watch(
 </script>
 
 <template>
-  <BaseCard>
-  <template #header>
+  <section class="border border-border/70 bg-surface p-4 h-full">
+    <div class="border-b border-border/70 pb-2 mb-4">
       <h3 class="font-semibold text-text-primary">AI 辅助面板</h3>
-    </template>
-  <div class="space-y-4">
+    </div>
+    <div class="space-y-4">
     <!-- 未选择 -->
     <div
       v-if="!selection.text"
@@ -59,7 +58,7 @@ watch(
 
     <!-- 已选择 -->
     <div v-else class="flex-1 flex flex-col gap-4">
-      <div class="p-4 bg-primary/10 rounded-xl border border-primary/20">
+      <div class="p-4 bg-primary/10 border border-primary/20">
         <p class="text-xs font-bold text-primary mb-2">选中内容</p>
         <p class="text-sm italic text-text-secondary">
           "{{ selection.text }}"
@@ -94,6 +93,6 @@ watch(
         </div>
       </div>
     </div>
-  </div>
-  </BaseCard>
+    </div>
+  </section>
 </template>
