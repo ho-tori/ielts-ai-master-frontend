@@ -30,6 +30,12 @@ const router = createRouter({
           meta: { requiresAuth: true }
         },
         {
+          path: 'ielts-intro',
+          name: 'IeltsIntro',
+          component: () => import('../views/ielts/IeltsIntroView.vue'),
+          meta: { requiresAuth: true }
+        },
+        {
           path: 'account',
           name: 'Account',
           component: () => import('../views/account/AccountView.vue'),

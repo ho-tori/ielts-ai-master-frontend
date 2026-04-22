@@ -31,6 +31,9 @@ const showResults = ref(false)
 const notes = ref('')
 const focusedQuestionId = ref<number | null>(null)
 
+// 翻译显示状态管理
+const visibleTranslations = ref<Record<number, boolean>>({})
+
 // 右侧工具栏当前激活的标签
 const activeTool = ref<'questions' | 'translation' | 'ai' | 'notes' | 'recent'>('questions')
 // 工具栏配置（key 用于切换，icon 用于渲染图标）
@@ -249,6 +252,11 @@ function handleSelectRecentArticle(articleId: string) {
   router.push({ path: '/reading', query: { articleId } })
 }
 
+// 切换段落翻译的显示/隐藏
+function handleToggleTranslation(paragraphNumber: number) {
+  visibleTranslations.value[paragraphNumber] = !visibleTranslations.value[paragraphNumber]
+}
+
 onMounted(() => {
   // 初始化布局状态与拖拽监听
   updateDesktopMode()
@@ -335,7 +343,9 @@ watch(
           class="h-full"
           :title="currentArticle.title"
           :paragraphs="currentArticle.paragraphs"
+          :visible-translations="visibleTranslations"
           @on-select="handleSelect"
+          @toggle-translation="handleToggleTranslation"
         />
 
         <!-- 固定底部题目导航（按序号跳题） -->
@@ -372,12 +382,14 @@ watch(
         :notes="notes"
         :recent-articles="recentArticlesPanel"
         :current-article-id="currentArticleId"
+        :visible-translations="visibleTranslations"
         @update:active-tool="(value) => (activeTool = value)"
         @update:notes="(value) => (notes = value)"
         @update-answer="updateAnswer"
         @submit="handleSubmit"
         @reset="handleReset"
         @select-recent="handleSelectRecentArticle"
+        @toggle-translation="handleToggleTranslation"
       />
     </div>
   </div>

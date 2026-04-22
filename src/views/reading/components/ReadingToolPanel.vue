@@ -26,6 +26,7 @@ const props = defineProps<{
   notes: string
   recentArticles: RecentArticle[]
   currentArticleId?: string
+  visibleTranslations: Record<number, boolean>
 }>()
 
 const emit = defineEmits<{
@@ -35,7 +36,12 @@ const emit = defineEmits<{
   (e: 'submit'): void
   (e: 'reset'): void
   (e: 'select-recent', articleId: string): void
+  (e: 'toggle-translation', paragraphNumber: number): void
 }>()
+
+function toggleTranslation(paragraphNumber: number) {
+  emit('toggle-translation', paragraphNumber)
+}
 </script>
 
 <template>
@@ -88,8 +94,16 @@ const emit = defineEmits<{
           :key="`trans-${p.paragraphNumber}`"
           class="p-3 bg-surface-muted/40"
         >
-          <p class="text-xs font-semibold text-text-secondary mb-1">段落 {{ p.paragraphNumber }}</p>
-          <p class="text-sm text-text-primary">{{ p.translation || '暂无翻译' }}</p>
+          <div class="flex items-center justify-between mb-1">
+            <p class="text-xs font-semibold text-text-secondary">段落 {{ p.paragraphNumber }}</p>
+            <button 
+              @click="toggleTranslation(p.paragraphNumber)"
+              class="text-xs text-primary hover:underline"
+            >
+              {{ props.visibleTranslations[p.paragraphNumber] ? '隐藏' : '显示' }}
+            </button>
+          </div>
+          <p v-if="props.visibleTranslations[p.paragraphNumber]" class="text-sm text-text-primary">{{ p.translation || '暂无翻译' }}</p>
         </div>
       </section>
 

@@ -4,10 +4,12 @@ import type { Paragraph } from '@/types/article'
 const props = defineProps<{
   title: string
   paragraphs: Paragraph[]
+  visibleTranslations: Record<number, boolean>
 }>()
 
 const emit = defineEmits<{
   (e: 'on-select', text: string): void
+  (e: 'toggle-translation', paragraphNumber: number): void
 }>()
 
 const handleMouseUp = () => {
@@ -31,7 +33,7 @@ const handleMouseUp = () => {
     >
       <div v-for="paragraph in paragraphs" :key="paragraph.paragraphNumber" class="paragraph-block">
         <p class="text-slate-800">{{ paragraph.content }}</p>
-        <p v-if="paragraph.translation" class="text-slate-500 text-sm mt-1">{{ paragraph.translation }}</p>
+        <p v-if="paragraph.translation && visibleTranslations[paragraph.paragraphNumber]" class="text-slate-500 text-sm mt-1">{{ paragraph.translation }}</p>
       </div>
     </div>
   </div>
