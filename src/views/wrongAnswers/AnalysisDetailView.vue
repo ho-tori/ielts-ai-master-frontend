@@ -126,14 +126,22 @@ async function loadAnalysis(questionId: number) {
   loading.value = true
   error.value = null
   try {
+    console.log('正在加载错题解析: questionId=' + questionId)
     const { data } = await apiGetAnalysis(questionId)
+    console.log('解析API返回:', data)
     if (data.code === 0) {
-      detail.value = data.data
+      if (data.data) {
+        detail.value = data.data
+        console.log('解析数据已设置: analysisExists=' + data.data.analysisExists)
+      } else {
+        error.value = '返回数据为空，请检查后端是否已重新编译'
+      }
     } else {
       error.value = data.message || '加载失败'
     }
   } catch (e: any) {
-    error.value = e?.response?.data?.message || e?.message || '加载失败'
+    console.error('解析请求失败', e)
+    error.value = e?.response?.data?.message || e?.message || '加载失败（请确认后端已重新编译并重启）'
   } finally {
     loading.value = false
   }
