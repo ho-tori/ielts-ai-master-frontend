@@ -2,11 +2,12 @@ import request from './request'
 import type { ApiResponse } from '../types/api'
 
 export interface WrongAnswerListItem {
-  analysisId: number
+  analysisId: number | null
   questionId: number
   questionStem: string
   articleTitle: string
   errorTypes: string[]
+  hasAnalysis: boolean
   createTime: string
 }
 

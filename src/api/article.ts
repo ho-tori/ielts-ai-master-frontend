@@ -96,6 +96,10 @@ export function submitAnswer(articleId: string, data: SubmitAnswerRequest) {
   )
 }
 
+export function apiGetProgress() {
+  return request.get<ApiResponse<Record<number, any>>>('/articles/progress')
+}
+
 export function uploadArticle(payload: UploadArticlePayload) {
   if (mockAuthEnabled) {
     const nextArticleId = mockArticles.reduce((max, item) => Math.max(max, item.id), 0) + 1

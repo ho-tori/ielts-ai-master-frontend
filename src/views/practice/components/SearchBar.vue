@@ -34,16 +34,16 @@
 
       <!-- 分类过滤 -->
       <div>
-        <label class="block text-sm font-medium text-text-secondary mb-3">分类</label>
+        <label class="block text-sm font-medium text-text-secondary mb-3">考试类型</label>
         <div class="flex gap-2">
           <BaseButton
-            v-for="cat in ['all', 'news', 'academic', 'fiction']"
+            v-for="cat in ['all', 'A类', 'G类']"
             :key="cat"
             size="sm"
             :variant="category === cat ? 'primary' : 'secondary'"
             @click="$emit('update:category', cat)"
           >
-            {{ cat === 'all' ? '全部' : cat === 'news' ? '新闻' : cat === 'academic' ? '学术' : '文学' }}
+            {{ cat === 'all' ? '全部' : cat }}
           </BaseButton>
         </div>
       </div>

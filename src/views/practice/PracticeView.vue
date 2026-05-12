@@ -5,9 +5,9 @@ import SearchBar from './components/SearchBar.vue'
 import ExerciseCard from './components/ExerciseCard.vue'
 import EmptyState from './components/EmptyState.vue'
 import Pagination from './components/Pagination.vue'
-import { getArticleList } from '@/api/article'
+import { getArticleList, apiGetProgress } from '@/api/article'
 import { useUserStore } from '@/stores/user'
-import type { Exercise } from '../../types/article'
+import type { ArticleListItem } from '@/types/article'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -17,68 +17,66 @@ const itemsPerPage = 9
 
 const searchKeyword = ref('')
 const selectedDifficulty = ref<'all' | 'easy' | 'medium' | 'hard'>('all')
-const selectedCategory = ref<'all' | 'news' | 'academic' | 'fiction'>('all')
+const selectedCategory = ref<'all' | 'A类' | 'G类'>('all')
 
-const exercisesFromApi = ref<Exercise[]>([])
+const articles = ref<ArticleListItem[]>([])
+const progressMap = ref<Record<number, any>>({})
 const loading = ref(false)
 const error = ref<string | null>(null)
 
-const fetchExercises = async () => {
+const fetchArticles = async () => {
   loading.value = true
   error.value = null
   try {
-    const { data } = await getArticleList({ 
-      examType: selectedCategory.value === 'all' ? undefined : selectedCategory.value,
-      difficulty: selectedDifficulty.value === 'all' ? undefined : selectedDifficulty.value,
-      page: currentPage.value - 1
-    })
+    const examType = selectedCategory.value === 'all' ? undefined : selectedCategory.value
+    const difficulty = selectedDifficulty.value === 'all' ? undefined : selectedDifficulty.value
+    const { data } = await getArticleList({ examType, difficulty, page: currentPage.value - 1 })
     if (data.code === 0) {
-      exercisesFromApi.value = data.data.map((article: any) => ({
-        id: article.id,
-        title: article.title,
-        description: article.description || '',
-        difficulty: article.difficulty || 'medium',
-        category: article.examType || 'academic',
-        examType: article.examType,
-        tags: article.tags || [],
-        wordCount: article.wordCount || 0,
-        estimatedTime: article.readingTime ? `${article.readingTime}分钟` : '15分钟',
-        questionCount: article.questions?.length || 0,
-        completed: false
-      }))
+      articles.value = data.data || []
     } else {
       error.value = data.message || '获取练习列表失败'
     }
   } catch (e) {
-    console.error('从后端获取练习列表失败', e)
+    console.error('获取练习列表失败', e)
     error.value = '网络错误，请检查后端服务是否启动'
-    exercisesFromApi.value = []
+    articles.value = []
   } finally {
     loading.value = false
   }
 }
 
+const fetchProgress = async () => {
+  try {
+    const { data } = await apiGetProgress()
+    if (data.code === 0) {
+      progressMap.value = data.data || {}
+    }
+  } catch (e) {
+    console.error('获取进度失败', e)
+  }
+}
+
 onMounted(async () => {
-  await fetchExercises()
+  await Promise.all([fetchArticles(), fetchProgress()])
 })
 
-const filteredExercises = computed(() => {
-  return exercisesFromApi.value.filter(exercise => {
-    const matchKeyword = !searchKeyword.value || 
-      exercise.title.toLowerCase().includes(searchKeyword.value.toLowerCase()) ||
-      exercise.description.toLowerCase().includes(searchKeyword.value.toLowerCase()) ||
-      exercise.tags.some(tag => tag.toLowerCase().includes(searchKeyword.value.toLowerCase()))
-    
-    return matchKeyword
+const filteredArticles = computed(() => {
+  return articles.value.filter(article => {
+    if (!searchKeyword.value) return true
+    const keyword = searchKeyword.value.toLowerCase()
+    const titleMatch = article.title.toLowerCase().includes(keyword)
+    const topicMatch = (article.topics || []).some(t =>
+      t.name.toLowerCase().includes(keyword) || t.code.toLowerCase().includes(keyword)
+    )
+    return titleMatch || topicMatch
   })
 })
 
-const totalPages = computed(() => Math.max(1, Math.ceil(filteredExercises.value.length / itemsPerPage)))
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredArticles.value.length / itemsPerPage)))
 
-const paginatedExercises = computed(() => {
+const paginatedArticles = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
-  const end = start + itemsPerPage
-  return filteredExercises.value.slice(start, end)
+  return filteredArticles.value.slice(start, start + itemsPerPage)
 })
 
 const handleSearch = (value: string) => {
@@ -89,22 +87,22 @@ const handleSearch = (value: string) => {
 const handleDifficultyChange = (value: string) => {
   selectedDifficulty.value = value as any
   currentPage.value = 1
+  fetchArticles()
 }
 
 const handleCategoryChange = async (value: string) => {
   selectedCategory.value = value as any
   currentPage.value = 1
-  await fetchExercises()
+  await fetchArticles()
 }
 
-const startPractice = (exerciseId: number) => {
-  console.log('🚀 开始练习，exerciseId:', exerciseId)
-  
-  const articleId = exerciseId
-  
+const startPractice = (articleId: number) => {
   userStore.addRecentArticle(articleId)
-  
-  router.push(`/reading?exerciseId=${exerciseId}`)
+  router.push(`/reading?articleId=${articleId}`)
+}
+
+const getArticleProgress = (articleId: number) => {
+  return progressMap.value[articleId] || null
 }
 </script>
 
@@ -119,14 +117,11 @@ const startPractice = (exerciseId: number) => {
         @click="router.push('/ielts-intro')"
         class="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 text-white font-medium transition-colors"
       >
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M-.01 8h.01" />
-        </svg>
         <span>雅思考试流程指南</span>
       </button>
     </div>
 
-    <SearchBar 
+    <SearchBar
       v-model="searchKeyword"
       :difficulty="selectedDifficulty"
       :category="selectedCategory"
@@ -137,7 +132,7 @@ const startPractice = (exerciseId: number) => {
 
     <div class="mb-6">
       <p class="text-text-secondary">
-        找到 <span class="font-semibold text-text-primary">{{ filteredExercises.length }}</span> 个相关习题
+        找到 <span class="font-semibold text-text-primary">{{ filteredArticles.length }}</span> 篇文章
         <span v-if="totalPages > 1" class="text-text-secondary/70">
           · 第 {{ currentPage }} / {{ totalPages }} 页
         </span>
@@ -149,14 +144,15 @@ const startPractice = (exerciseId: number) => {
     </div>
 
     <div v-else-if="error" class="p-4 bg-danger/10 border border-danger/30 rounded-lg">
-      <p class="text-danger text-sm">❌ {{ error }}</p>
+      <p class="text-danger text-sm">{{ error }}</p>
     </div>
 
-    <div v-else-if="paginatedExercises.length > 0" class="space-y-4">
-      <ExerciseCard 
-        v-for="exercise in paginatedExercises"
-        :key="exercise.id"
-        :exercise="exercise"
+    <div v-else-if="paginatedArticles.length > 0" class="space-y-4">
+      <ExerciseCard
+        v-for="article in paginatedArticles"
+        :key="article.id"
+        :article="article"
+        :progress="getArticleProgress(article.id)"
         @start="startPractice"
       />
     </div>
@@ -164,7 +160,7 @@ const startPractice = (exerciseId: number) => {
     <EmptyState v-else />
 
     <div class="mt-8">
-      <Pagination 
+      <Pagination
         :current-page="currentPage"
         :total-pages="totalPages"
         @update:current-page="currentPage = $event"

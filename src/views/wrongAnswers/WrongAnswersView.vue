@@ -59,20 +59,20 @@
         :loading="diagnosisLoading"
       />
 
-      <!-- Analyzed Wrong Answer List -->
+      <!-- Wrong Answer List -->
       <BaseCard>
         <template #header>
           <h3 class="font-bold text-text-primary">
-            已分析错题
+            错题列表
             <span v-if="wrongAnswers.length" class="text-sm text-text-secondary font-normal ml-2">共 {{ wrongAnswers.length }} 题</span>
           </h3>
         </template>
         <Loading v-if="listLoading" />
-        <Empty v-else-if="wrongAnswers.length === 0">暂无已分析的错题，完成答题后点击"生成AI解析"即可</Empty>
+        <Empty v-else-if="wrongAnswers.length === 0">暂无错题记录，快去完成一套阅读练习吧</Empty>
         <div v-else class="space-y-3">
           <div
             v-for="item in wrongAnswers"
-            :key="item.analysisId"
+            :key="item.questionId"
             class="p-4 rounded-lg border border-border/70 hover:border-primary/30 hover:bg-surface-muted transition-colors cursor-pointer"
             @click="viewDetail(item)"
           >
@@ -81,8 +81,12 @@
                 <p class="text-sm text-text-secondary mb-1">{{ item.articleTitle }}</p>
                 <p class="text-text-primary line-clamp-2">{{ item.questionStem }}</p>
               </div>
-              <div class="flex items-center gap-1.5 shrink-0">
-                <ErrorTypeBadge v-for="et in item.errorTypes" :key="et" :type="et" />
+              <div class="flex items-center gap-2 shrink-0">
+                <span
+                  v-if="!item.hasAnalysis"
+                  class="text-xs px-2 py-0.5 rounded-full bg-amber-50 text-amber-700"
+                >待分析</span>
+                <ErrorTypeBadge v-for="et in (item.errorTypes || [])" :key="et" :type="et" />
               </div>
             </div>
           </div>
