@@ -5,6 +5,7 @@ import ArticleSection from './components/ArticleSection.vue'
 import ReadingBottomNavigator from './components/ReadingBottomNavigator.vue'
 import ReadingToolPanel from './components/ReadingToolPanel.vue'
 import { getArticleDetail, submitAnswer } from '@/api/article'
+import { apiGetNotes, apiSaveHighlight, apiSaveNote, apiClearHighlights } from '@/api/note'
 import { useUserStore } from '@/stores/user'
 import type { RecentArticle, Article } from '../../types/article'
 
@@ -18,12 +19,6 @@ const error = ref<string | null>(null)
 const loading = ref(false)
 const articleFromApi = ref<Article | null>(null)
 
-// AI 面板的上下文：来自正文选中的文本 + 当前文章标题
-const selectionContext = ref({
-  text: '',
-  articleTitle: ''
-})
-
 // 右侧工具区的状态（最近阅读、答题、笔记、聚焦题目）
 const recentArticlesPanel = ref<RecentArticle[]>([])
 const selectedAnswers = ref<Record<number, string>>({})
@@ -33,6 +28,33 @@ const focusedQuestionId = ref<number | null>(null)
 
 // 翻译显示状态管理
 const visibleTranslations = ref<Record<number, boolean>>({})
+
+// 高亮和笔记状态
+interface HighlightRange { startOffset: number; endOffset: number; color: string; id: number }
+const highlights = ref<Record<number, HighlightRange[]>>({})
+const noteParagraphs = ref(new Set<number>())
+const noteContents = ref<Record<number, string>>({})
+const noteSaveTimer = ref<ReturnType<typeof setTimeout> | null>(null)
+
+// 高亮颜色选项
+const highlightColors = ['#ffeb3b', '#a5d6a7', '#90caf9', '#f48fb1', '#ce93d8']
+const highlightToolbarX = ref(0)
+const highlightToolbarY = ref(0)
+
+// 选中文本的上下文（含偏移量）
+const selectionContext = ref<{
+  text: string
+  paragraphNumber: number
+  startOffset: number
+  endOffset: number
+  articleTitle: string
+}>({
+  text: '',
+  paragraphNumber: 0,
+  startOffset: 0,
+  endOffset: 0,
+  articleTitle: ''
+})
 
 // 右侧工具栏当前激活的标签
 const activeTool = ref<'questions' | 'translation' | 'ai' | 'notes' | 'recent'>('questions')
@@ -172,6 +194,7 @@ const fetchArticleFromApi = async (articleId: number) => {
     if (data.code === 0) {
       articleFromApi.value = data.data
       userStore.addRecentArticle(articleId)
+      loadHighlightsAndNotes(articleId)
     } else {
       error.value = data.message || '获取文章失败'
     }
@@ -219,11 +242,115 @@ const fetchRecentArticles = async () => {
 }
 
 // 正文选词回调：更新 AI 分析上下文
-function handleSelect(text: string) {
+function handleSelect(text: string, paragraphNumber: number, startOffset: number, endOffset: number) {
   if (!currentArticle.value) return
+  const sel = window.getSelection()
+  if (sel && sel.rangeCount > 0) {
+    const rect = sel.getRangeAt(0).getBoundingClientRect()
+    highlightToolbarX.value = rect.left + rect.width / 2 - 60
+    highlightToolbarY.value = rect.top - 40
+  }
   selectionContext.value = {
     text,
+    paragraphNumber,
+    startOffset,
+    endOffset,
     articleTitle: currentArticle.value.title
+  }
+}
+
+// 高亮选中文本
+async function addHighlight(color?: string) {
+  const ctx = selectionContext.value
+  if (!ctx.text || !currentArticle.value) return
+  const articleId = currentArticle.value.id
+
+  try {
+    const { data } = await apiSaveHighlight(articleId, ctx.paragraphNumber, {
+      startOffset: ctx.startOffset,
+      endOffset: ctx.endOffset,
+      text: ctx.text
+    }, color || '#ffeb3b')
+    if (data.code === 0) {
+      // 添加到本地状态
+      if (!highlights.value[ctx.paragraphNumber]) {
+        highlights.value[ctx.paragraphNumber] = []
+      }
+      highlights.value[ctx.paragraphNumber].push({
+        startOffset: ctx.startOffset,
+        endOffset: ctx.endOffset,
+        color: color || '#ffeb3b',
+        id: data.data.id
+      })
+    }
+  } catch (e) {
+    console.error('保存高亮失败', e)
+  }
+}
+
+// 清除所有高亮
+async function handleClearHighlights() {
+  if (!currentArticle.value) return
+  try {
+    await apiClearHighlights(currentArticle.value.id)
+    highlights.value = {}
+  } catch (e) {
+    console.error('清除高亮失败', e)
+  }
+}
+
+// 保存笔记（带防抖）
+function handleSaveNote(content: string) {
+  if (!currentArticle.value) return
+  const articleId = currentArticle.value.id
+  // 保存到本地状态
+  notes.value = content
+  // 防抖保存到后端
+  if (noteSaveTimer.value) clearTimeout(noteSaveTimer.value)
+  noteSaveTimer.value = setTimeout(async () => {
+    try {
+      // 找当前笔记对应的段落（使用第一个段落作为默认）
+      const paraNum = currentArticle.value?.paragraphs?.[0]?.paragraphNumber || 1
+      await apiSaveNote(articleId, paraNum, content)
+    } catch (e) {
+      console.error('保存笔记失败', e)
+    }
+  }, 1500)
+}
+
+// 加载高亮和笔记
+async function loadHighlightsAndNotes(articleId: number) {
+  try {
+    const { data } = await apiGetNotes(articleId)
+    if (data.code !== 0) return
+
+    const hlMap: Record<number, HighlightRange[]> = {}
+    const noteParas = new Set<number>()
+    const noteContentMap: Record<number, string> = {}
+
+    for (const item of data.data || []) {
+      if (item.type === 'highlight' && item.position) {
+        const pos = item.position as any
+        if (!hlMap[item.paragraphNumber]) hlMap[item.paragraphNumber] = []
+        hlMap[item.paragraphNumber].push({
+          startOffset: pos.startOffset || 0,
+          endOffset: pos.endOffset || 0,
+          color: item.highlightColor,
+          id: item.id
+        })
+      } else if (item.type === 'note') {
+        noteParas.add(item.paragraphNumber)
+        noteContentMap[item.paragraphNumber] = item.noteContent || ''
+      }
+    }
+    highlights.value = hlMap
+    noteParagraphs.value = noteParas
+    noteContents.value = noteContentMap
+    if (noteContentMap[1] != null) {
+      notes.value = noteContentMap[1]
+    }
+  } catch (e) {
+    console.error('加载高亮和笔记失败', e)
   }
 }
 
@@ -367,9 +494,37 @@ watch(
           :title="currentArticle.title"
           :paragraphs="currentArticle.paragraphs"
           :visible-translations="visibleTranslations"
+          :highlights="highlights"
+          :note-paragraphs="noteParagraphs"
           @on-select="handleSelect"
           @toggle-translation="handleToggleTranslation"
         />
+
+        <!-- 选中文字时的浮动高亮按钮 -->
+        <div
+          v-if="selectionContext.text"
+          class="fixed z-40 bg-white rounded-lg shadow-lg border border-border px-2 py-1.5 flex items-center gap-1"
+          :style="{ top: highlightToolbarY + 'px', left: highlightToolbarX + 'px' }"
+        >
+          <button
+            v-for="c in highlightColors"
+            :key="c"
+            class="w-5 h-5 rounded-full border border-gray-300 cursor-pointer hover:scale-110 transition-transform"
+            :style="{ backgroundColor: c }"
+            @click="addHighlight(c); selectionContext.text = ''"
+          />
+          <span class="text-xs text-text-secondary ml-2 mr-1 cursor-pointer hover:text-primary" @click="addHighlight(); selectionContext.text = ''">确认</span>
+        </div>
+
+        <!-- 清除高亮按钮（文章标题旁） -->
+        <div v-if="Object.keys(highlights).length > 0" class="fixed top-20 left-6 z-30">
+          <button
+            class="text-xs px-2 py-1 bg-white border border-border rounded shadow-sm hover:bg-danger/5 hover:border-danger/30 text-text-secondary transition-colors"
+            @click="handleClearHighlights"
+          >
+            清除全部高亮
+          </button>
+        </div>
 
         <!-- 固定底部题目导航（按序号跳题） -->
         <div class="fixed z-20" :style="navigatorStyle">
@@ -407,7 +562,7 @@ watch(
         :current-article-id="currentArticleId"
         :visible-translations="visibleTranslations"
         @update:active-tool="(value) => (activeTool = value)"
-        @update:notes="(value) => (notes = value)"
+        @update:notes="handleSaveNote"
         @update-answer="updateAnswer"
         @submit="handleSubmit"
         @reset="handleReset"
