@@ -88,10 +88,11 @@
                 >待分析</span>
                 <ErrorTypeBadge v-for="et in (item.errorTypes || [])" :key="et" :type="et" />
                 <BaseButton
-                  v-if="item.articleId"
                   variant="ghost"
                   size="sm"
                   class="!text-xs"
+                  :disabled="!item.articleId"
+                  :title="!item.articleId ? '后端未重新编译，缺少articleId' : '回到原文查看'"
                   @click.stop="goToArticle(item)"
                 >回原文</BaseButton>
               </div>
@@ -142,10 +143,11 @@
                 {{ item.isCorrect ? '正确' : '错误' }}
               </span>
               <BaseButton
-                v-if="!item.isCorrect && item.articleId"
+                v-if="!item.isCorrect"
                 variant="ghost"
                 size="sm"
                 class="!text-xs"
+                :disabled="!item.articleId"
                 @click.stop="goToArticle(item)"
               >回原文</BaseButton>
               <BaseButton
