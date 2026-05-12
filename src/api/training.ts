@@ -40,8 +40,18 @@ export interface TrainingHistoryItem {
   createTime: string
 }
 
-export function apiGenerateTraining() {
-  return request.post<ApiResponse<TrainingSession>>('/training/generate')
+export interface FocusPoint {
+  type: string
+  count: number
+  source: string
+}
+
+export function apiGetFocusPoints() {
+  return request.get<ApiResponse<FocusPoint[]>>('/training/focus-points')
+}
+
+export function apiGenerateTraining(focusType?: string) {
+  return request.post<ApiResponse<TrainingSession>>('/training/generate', { focusType: focusType || 'auto' })
 }
 
 export function apiGetTraining(id: number) {
