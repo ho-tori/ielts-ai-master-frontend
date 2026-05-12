@@ -214,6 +214,7 @@ function viewDetail(item: WrongAnswerListItem) {
 }
 
 function goToArticle(item: WrongAnswerListItem) {
+  console.log('回原文: articleId=' + item.articleId + ', questionId=' + item.questionId)
   if (item.articleId) {
     router.push(`/reading?articleId=${item.articleId}&focusQuestion=${item.questionId}`)
   }
