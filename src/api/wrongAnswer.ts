@@ -32,7 +32,7 @@ export interface AnalysisDetail {
 }
 
 export function apiAnalyzeWrongAnswer(questionId: number) {
-  return request.post<ApiResponse<AnalysisDetail>>(`/wrong-answers/${questionId}/analyze`)
+  return request.post<ApiResponse<AnalysisDetail>>(`/wrong-answers/${questionId}/analyze`, {}, { timeout: 120000 })
 }
 
 export function apiGetAnalysis(questionId: number) {
