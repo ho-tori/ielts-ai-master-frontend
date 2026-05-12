@@ -30,3 +30,13 @@ export function apiGetUserStats() {
 
 	return request.get<ApiResponse<UserStats>>('/stats')
 }
+
+export function apiGetErrorStats(period: string = 'all') {
+	return request.get<ApiResponse<Array<{ errorType: string; count: number; percentage: number }>>>('/error-patterns/stats', {
+		params: { period }
+	})
+}
+
+export function apiGetDiagnosis() {
+	return request.get<ApiResponse<{ diagnosis: string; topWeaknesses: Array<{ errorType: string; description: string; suggestion: string }> }>>('/error-patterns/diagnosis')
+}
