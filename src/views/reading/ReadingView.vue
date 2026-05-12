@@ -7,6 +7,7 @@ import ReadingToolPanel from './components/ReadingToolPanel.vue'
 import { getArticleDetail, submitAnswer } from '@/api/article'
 import { apiGetNotes, apiSaveHighlight, apiSaveNote, apiClearHighlights, apiDeleteNote } from '@/api/note'
 import { useUserStore } from '@/stores/user'
+import { BaseButton } from '@/components'
 import type { RecentArticle, Article } from '../../types/article'
 
 // 路由与全局状态
@@ -524,10 +525,10 @@ watch(
           <BaseButton variant="primary" @click="$router.push('/practice')">去练习中心</BaseButton>
           <BaseButton variant="secondary" @click="$router.push('/wrong-answers')">查看错题本</BaseButton>
         </div>
-        <div v-if="recentArticles.length > 0" class="mt-8 text-left">
+        <div v-if="recentArticlesPanel.length > 0" class="mt-8 text-left">
           <p class="text-xs text-text-secondary mb-3">最近阅读过的文章</p>
           <div
-            v-for="item in recentArticles.slice(0, 3)"
+            v-for="item in recentArticlesPanel.slice(0, 3)"
             :key="item.id"
             class="flex items-center justify-between p-2 rounded-lg hover:bg-surface-muted cursor-pointer transition-colors"
             @click="$router.push(`/reading?articleId=${item.id}`)"
