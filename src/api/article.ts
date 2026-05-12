@@ -39,7 +39,7 @@ export interface UploadArticlePayload {
   }>
 }
 
-export function getArticleList(params?: { examType?: string; difficulty?: string; page?: number }) {
+export function getArticleList(params?: { examType?: string; difficulty?: string; page?: number; size?: number }) {
   if (mockAuthEnabled) {
     const filtered = mockArticles.filter((item) => {
       const examTypeOk = !params?.examType || item.examType === params.examType

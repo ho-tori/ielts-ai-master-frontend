@@ -4,16 +4,12 @@ import { useRouter } from 'vue-router'
 import SearchBar from './components/SearchBar.vue'
 import ExerciseCard from './components/ExerciseCard.vue'
 import EmptyState from './components/EmptyState.vue'
-import Pagination from './components/Pagination.vue'
 import { getArticleList, apiGetProgress } from '@/api/article'
 import { useUserStore } from '@/stores/user'
 import type { ArticleListItem } from '@/types/article'
 
 const router = useRouter()
 const userStore = useUserStore()
-
-const currentPage = ref(1)
-const itemsPerPage = 9
 
 const searchKeyword = ref('')
 const selectedDifficulty = ref<string>('all')
@@ -30,7 +26,7 @@ const fetchArticles = async () => {
   try {
     const examType = selectedCategory.value === 'all' ? undefined : selectedCategory.value
     const difficulty = selectedDifficulty.value === 'all' ? undefined : selectedDifficulty.value
-    const { data } = await getArticleList({ examType, difficulty, page: currentPage.value - 1 })
+    const { data } = await getArticleList({ examType, difficulty, page: 0, size: 100 })
     if (data.code === 0) {
       articles.value = data.data || []
     } else {
@@ -72,27 +68,17 @@ const filteredArticles = computed(() => {
   })
 })
 
-const totalPages = computed(() => Math.max(1, Math.ceil(filteredArticles.value.length / itemsPerPage)))
-
-const paginatedArticles = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  return filteredArticles.value.slice(start, start + itemsPerPage)
-})
-
 const handleSearch = (value: string) => {
   searchKeyword.value = value
-  currentPage.value = 1
 }
 
-const handleDifficultyChange = (value: string) => {
+const handleDifficultyChange = async (value: string) => {
   selectedDifficulty.value = value as any
-  currentPage.value = 1
-  fetchArticles()
+  await fetchArticles()
 }
 
 const handleCategoryChange = async (value: string) => {
   selectedCategory.value = value as any
-  currentPage.value = 1
   await fetchArticles()
 }
 
@@ -133,9 +119,6 @@ const getArticleProgress = (articleId: number) => {
     <div class="mb-6">
       <p class="text-text-secondary">
         找到 <span class="font-semibold text-text-primary">{{ filteredArticles.length }}</span> 篇文章
-        <span v-if="totalPages > 1" class="text-text-secondary/70">
-          · 第 {{ currentPage }} / {{ totalPages }} 页
-        </span>
       </p>
     </div>
 
@@ -147,9 +130,9 @@ const getArticleProgress = (articleId: number) => {
       <p class="text-danger text-sm">{{ error }}</p>
     </div>
 
-    <div v-else-if="paginatedArticles.length > 0" class="space-y-4">
+    <div v-else-if="filteredArticles.length > 0" class="space-y-4">
       <ExerciseCard
-        v-for="article in paginatedArticles"
+        v-for="article in filteredArticles"
         :key="article.id"
         :article="article"
         :progress="getArticleProgress(article.id)"
@@ -158,13 +141,5 @@ const getArticleProgress = (articleId: number) => {
     </div>
 
     <EmptyState v-else />
-
-    <div class="mt-8">
-      <Pagination
-        :current-page="currentPage"
-        :total-pages="totalPages"
-        @update:current-page="currentPage = $event"
-      />
-    </div>
   </div>
 </template>

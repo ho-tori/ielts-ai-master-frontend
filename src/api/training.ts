@@ -43,7 +43,6 @@ export interface TrainingHistoryItem {
 export interface FocusPoint {
   type: string
   count: number
-  source: string
 }
 
 export function apiGetFocusPoints() {
