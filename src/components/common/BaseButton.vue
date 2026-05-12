@@ -4,7 +4,7 @@
 	class="inline-flex items-center justify-center rounded-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed"
 		:class="classes"
 		:disabled="disabled || loading"
-		@click="$emit('click')"
+		@click="$emit('click', $event)"
 	>
 		<span v-if="loading" class="mr-2 h-4 w-4 border-2 border-white/70 border-t-transparent rounded-full animate-spin"></span>
 		<slot />
