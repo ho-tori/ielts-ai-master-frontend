@@ -5,7 +5,7 @@ import ArticleSection from './components/ArticleSection.vue'
 import ReadingBottomNavigator from './components/ReadingBottomNavigator.vue'
 import ReadingToolPanel from './components/ReadingToolPanel.vue'
 import { getArticleDetail, submitAnswer } from '@/api/article'
-import { apiGetNotes, apiSaveHighlight, apiSaveNote, apiClearHighlights } from '@/api/note'
+import { apiGetNotes, apiSaveHighlight, apiSaveNote, apiClearHighlights, apiDeleteNote } from '@/api/note'
 import { useUserStore } from '@/stores/user'
 import type { RecentArticle, Article } from '../../types/article'
 
@@ -299,6 +299,26 @@ async function handleClearHighlights() {
   }
 }
 
+// 删除单个高亮
+async function handleDeleteHighlight(highlightId: number) {
+  try {
+    await apiDeleteNote(highlightId)
+    // 从本地状态移除
+    for (const paraNum of Object.keys(highlights.value)) {
+      const num = Number(paraNum)
+      highlights.value[num] = (highlights.value[num] || []).filter(h => h.id !== highlightId)
+      if (highlights.value[num].length === 0) {
+        delete highlights.value[num]
+      }
+    }
+  } catch (e) {
+    console.error('删除高亮失败', e)
+  }
+}
+
+// 是否有高亮
+const hasHighlights = computed(() => Object.keys(highlights.value).length > 0)
+
 // 保存笔记（带防抖）
 function handleSaveNote(content: string) {
   if (!currentArticle.value) return
@@ -496,8 +516,11 @@ watch(
           :visible-translations="visibleTranslations"
           :highlights="highlights"
           :note-paragraphs="noteParagraphs"
+          :has-highlights="hasHighlights"
           @on-select="handleSelect"
           @toggle-translation="handleToggleTranslation"
+          @delete-highlight="handleDeleteHighlight"
+          @clear-highlights="handleClearHighlights"
         />
 
         <!-- 选中文字时的浮动高亮按钮 -->
@@ -514,16 +537,6 @@ watch(
             @click="addHighlight(c); selectionContext.text = ''"
           />
           <span class="text-xs text-text-secondary ml-2 mr-1 cursor-pointer hover:text-primary" @click="addHighlight(); selectionContext.text = ''">确认</span>
-        </div>
-
-        <!-- 清除高亮按钮（文章标题旁） -->
-        <div v-if="Object.keys(highlights).length > 0" class="fixed top-20 left-6 z-30">
-          <button
-            class="text-xs px-2 py-1 bg-white border border-border rounded shadow-sm hover:bg-danger/5 hover:border-danger/30 text-text-secondary transition-colors"
-            @click="handleClearHighlights"
-          >
-            清除全部高亮
-          </button>
         </div>
 
         <!-- 固定底部题目导航（按序号跳题） -->
