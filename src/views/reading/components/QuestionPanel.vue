@@ -180,7 +180,7 @@ const score = computed(() => {
   if (!props.showResults) return 0
   let correct = 0
   props.questions.forEach(q => {
-    if (selectedAnswers.value[q.id] === q.correctAnswer) {
+    if (selectedAnswers.value[q.id] === normalizeAnswer(q.correctAnswer)) {
       correct++
     }
   })
@@ -199,15 +199,28 @@ const scoreBgClass = computed(() => {
   return 'bg-danger/10'
 })
 
+function normalizeAnswer(raw: string | undefined): string {
+  if (!raw) return ''
+  // 去掉JSON引号：数据库JSON列可能存储 "A" 而非 A
+  try {
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed)) return parsed.join(',')
+    return String(parsed)
+  } catch {
+    return raw
+  }
+}
+
 function getButtonVariant(questionId: number, option: string, correctAnswer?: string): ButtonVariant {
   const userAnswer = selectedAnswers.value[questionId]
-  
+  const normalizedCorrect = normalizeAnswer(correctAnswer)
+
   if (props.showResults) {
-    if (option === correctAnswer) return 'success'
-    if (option === userAnswer && option !== correctAnswer) return 'danger'
+    if (option === normalizedCorrect) return 'success'
+    if (option === userAnswer && option !== normalizedCorrect) return 'danger'
     return 'secondary'
   }
-  
+
   return option === userAnswer ? 'tertiary' : 'secondary'
 }
 </script>
