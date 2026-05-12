@@ -16,7 +16,7 @@ const currentPage = ref(1)
 const itemsPerPage = 9
 
 const searchKeyword = ref('')
-const selectedDifficulty = ref<'all' | 'easy' | 'medium' | 'hard'>('all')
+const selectedDifficulty = ref<string>('all')
 const selectedCategory = ref<'all' | 'A类' | 'G类'>('all')
 
 const articles = ref<ArticleListItem[]>([])

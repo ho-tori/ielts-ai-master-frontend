@@ -21,13 +21,13 @@
         <label class="block text-sm font-medium text-text-secondary mb-3">难度</label>
         <div class="flex gap-2">
           <BaseButton
-            v-for="level in ['all', 'easy', 'medium', 'hard']"
-            :key="level"
+            v-for="item in difficultyOptions"
+            :key="item.value"
             size="sm"
-            :variant="difficulty === level ? 'primary' : 'secondary'"
-            @click="$emit('update:difficulty', level)"
+            :variant="difficulty === item.value ? 'primary' : 'secondary'"
+            @click="$emit('update:difficulty', item.value)"
           >
-            {{ level === 'all' ? '全部' : level === 'easy' ? '简单' : level === 'medium' ? '中等' : '困难' }}
+            {{ item.label }}
           </BaseButton>
         </div>
       </div>
@@ -54,6 +54,13 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { BaseCard, BaseButton } from '@/components'
+
+const difficultyOptions = [
+  { label: '全部', value: 'all' },
+  { label: '简单', value: '简单' },
+  { label: '中等', value: '中等' },
+  { label: '困难', value: '困难' }
+]
 
 defineProps<{
   modelValue: string

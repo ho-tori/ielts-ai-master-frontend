@@ -66,20 +66,14 @@ defineProps<{
 defineEmits<{ (e: 'start', id: number): void }>()
 
 function getDifficultyLabel(difficulty: string) {
-  switch (difficulty) {
-    case 'easy': return '简单'
-    case 'medium': return '中等'
-    case 'hard': return '困难'
-    default: return difficulty || '中等'
-  }
+  const map: Record<string, string> = { '简单': '简单', 'easy': '简单', '中等': '中等', 'medium': '中等', '困难': '困难', 'hard': '困难' }
+  return map[difficulty] || difficulty || '中等'
 }
 
 function getDifficultyColor(difficulty: string) {
-  switch (difficulty) {
-    case 'easy': return 'text-success'
-    case 'medium': return 'text-primary'
-    case 'hard': return 'text-danger'
-    default: return 'text-text-secondary'
-  }
+  if (difficulty === '简单' || difficulty === 'easy') return 'text-success'
+  if (difficulty === '中等' || difficulty === 'medium') return 'text-primary'
+  if (difficulty === '困难' || difficulty === 'hard') return 'text-danger'
+  return 'text-text-secondary'
 }
 </script>
