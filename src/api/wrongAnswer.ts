@@ -25,14 +25,14 @@ export interface AnswerHistoryItem {
 }
 
 export interface AnalysisDetail {
-  analysisId: number
+  analysisId: number | null
   questionId: number
   questionStem: string
   correctAnswer: string
   userAnswer: string
   errorTypes: string[]
-  detailedAnalysis: string
-  correctThoughtPath: string
+  detailedAnalysis: string | null
+  correctThoughtPath: string | null
   examPoints: Array<{
     type: string
     sourceWord?: string
@@ -41,7 +41,8 @@ export interface AnalysisDetail {
     note?: string
     reason?: string
   }>
-  createTime: string
+  createTime: string | null
+  analysisExists: boolean
 }
 
 export function apiAnalyzeWrongAnswer(questionId: number) {

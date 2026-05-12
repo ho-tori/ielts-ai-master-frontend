@@ -204,8 +204,23 @@ async function handleSubmit() {
 
   try {
     const { data } = await apiSubmitTraining(session.value.trainingId, answerList)
-    if (data.code === 0) {
-      session.value = data.data
+    if (data.code === 0 && data.data) {
+      const result = data.data
+      session.value.score = result.score
+      session.value.completed = true
+      if (result.items) {
+        for (let i = 0; i < session.value.items.length && i < result.items.length; i++) {
+          const s = result.items[i]
+          if (s.locateQuestion) {
+            session.value.items[i].locateQuestion.userCorrect = s.locateQuestion.userCorrect
+            session.value.items[i].locateQuestion.userAnswer = s.locateQuestion.userAnswer
+          }
+          if (s.synonymQuestion) {
+            session.value.items[i].synonymQuestion.userCorrect = s.synonymQuestion.userCorrect
+            session.value.items[i].synonymQuestion.userAnswer = s.synonymQuestion.userAnswer
+          }
+        }
+      }
       showResult.value = true
     }
   } catch (e: any) {

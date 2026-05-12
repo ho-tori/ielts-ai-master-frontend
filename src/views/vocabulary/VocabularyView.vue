@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { BaseCard, BaseButton, Loading, Empty } from '@/components'
 import VocabularyItemCard from './components/VocabularyItemCard.vue'
 import { apiGenerateVocabulary, apiGetGenerationStatus, apiGetVocabularyList, apiGetClusters, apiDeleteVocabulary } from '@/api/vocabulary'
@@ -91,8 +91,14 @@ let pollTimer: ReturnType<typeof setInterval> | null = null
 onMounted(() => {
   fetchClusters()
   fetchList()
-  // 检查是否有正在进行的生成任务
   checkPendingGeneration()
+})
+
+onBeforeUnmount(() => {
+  if (pollTimer) {
+    clearInterval(pollTimer)
+    pollTimer = null
+  }
 })
 
 async function checkPendingGeneration() {

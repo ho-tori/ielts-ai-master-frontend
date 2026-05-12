@@ -404,7 +404,9 @@ async function handleSubmit() {
     const userAnswer = selectedAnswers.value[q.id]
     if (!userAnswer) continue
     try {
-      const { data } = await submitAnswer(q.id, {
+      const articleId = currentArticle.value?.id
+      if (!articleId) continue
+      const { data } = await submitAnswer(String(articleId), {
         questionId: q.id,
         userAnswer: userAnswer
       })
