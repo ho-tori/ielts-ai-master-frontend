@@ -258,5 +258,6 @@ onMounted(() => {
   fetchList()
   fetchStats()
   fetchDiagnosis()
+  fetchHistory()
 })
 </script>
