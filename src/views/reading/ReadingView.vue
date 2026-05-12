@@ -421,11 +421,11 @@ watch(
         class="fixed bottom-20 right-6 z-30"
       >
         <router-link
-          :to="`/wrong-answers/${wrongQuestionIds[0]}`"
+          to="/wrong-answers"
           class="inline-flex items-center gap-2 px-4 py-3 bg-primary text-white rounded-lg shadow-lg hover:bg-primary-hover transition-colors text-sm font-medium"
         >
           <span>📊</span>
-          <span>查看AI错题解析 ({{ wrongQuestionIds.length }}题)</span>
+          <span>查看错题本 ({{ wrongQuestionIds.length }}道错题)</span>
         </router-link>
       </div>
     </div>

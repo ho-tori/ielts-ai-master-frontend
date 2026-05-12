@@ -8,16 +8,17 @@ export interface WrongAnswerListItem {
 }
 
 export interface AnalysisDetail {
-  analysisId: number
+  analysisId: number | null
   questionId: number
   questionStem: string
   correctAnswer: string
   userAnswer: string
   errorTypes: string[]
-  detailedAnalysis: string
-  correctThoughtPath: string
+  detailedAnalysis: string | null
+  correctThoughtPath: string | null
   examPoints: ExamPoint[]
-  createTime: string
+  createTime: string | null
+  analysisExists: boolean
 }
 
 export interface ExamPoint {

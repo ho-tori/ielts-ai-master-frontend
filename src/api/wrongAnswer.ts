@@ -43,3 +43,20 @@ export function apiGetWrongAnswerList(page: number = 0, size: number = 10) {
     params: { page, size }
   })
 }
+
+export interface AnswerHistoryItem {
+  questionId: number
+  articleTitle: string
+  questionStem: string
+  userAnswer: string
+  correctAnswer: string
+  isCorrect: boolean
+  hasAnalysis: boolean
+  answerTime: string
+}
+
+export function apiGetAnswerHistory(page: number = 0, size: number = 50) {
+  return request.get<ApiResponse<AnswerHistoryItem[]>>('/wrong-answers/history', {
+    params: { page, size }
+  })
+}
