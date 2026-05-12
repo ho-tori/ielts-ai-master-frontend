@@ -77,7 +77,7 @@
             @click="viewDetail(item)"
           >
             <div class="flex items-start justify-between gap-3">
-              <div class="flex-1 min-w-0">
+              <div class="flex-1 min-w-0" @click.stop="viewDetail(item)">
                 <p class="text-sm text-text-secondary mb-1">{{ item.articleTitle }}</p>
                 <p class="text-text-primary line-clamp-2">{{ item.questionStem }}</p>
               </div>
@@ -87,6 +87,13 @@
                   class="text-xs px-2 py-0.5 rounded-full bg-amber-50 text-amber-700"
                 >待分析</span>
                 <ErrorTypeBadge v-for="et in (item.errorTypes || [])" :key="et" :type="et" />
+                <BaseButton
+                  v-if="item.articleId"
+                  variant="ghost"
+                  size="sm"
+                  class="!text-xs"
+                  @click.stop="goToArticle(item)"
+                >回原文</BaseButton>
               </div>
             </div>
           </div>
@@ -116,8 +123,9 @@
           <div
             v-for="item in history"
             :key="`${item.questionId}-${item.answerTime}`"
-            class="flex items-center justify-between p-3 rounded-lg border border-border/70"
+            class="flex items-center justify-between p-3 rounded-lg border border-border/70 cursor-pointer"
             :class="item.isCorrect ? 'hover:border-success/30' : 'hover:border-danger/30'"
+            @click="!item.isCorrect && $router.push(`/wrong-answers/${item.questionId}`)"
           >
             <div class="flex-1 min-w-0">
               <p class="text-xs text-text-secondary mb-0.5">{{ item.articleTitle }}</p>
@@ -134,10 +142,17 @@
                 {{ item.isCorrect ? '正确' : '错误' }}
               </span>
               <BaseButton
+                v-if="!item.isCorrect && item.articleId"
+                variant="ghost"
+                size="sm"
+                class="!text-xs"
+                @click.stop="goToArticle(item)"
+              >回原文</BaseButton>
+              <BaseButton
                 v-if="!item.isCorrect"
                 variant="secondary"
                 size="sm"
-                @click="item.articleId ? $router.push(`/reading?articleId=${item.articleId}&focusQuestion=${item.questionId}`) : $router.push(`/wrong-answers/${item.questionId}`)"
+                @click.stop="$router.push(`/wrong-answers/${item.questionId}`)"
               >
                 {{ item.hasAnalysis ? '查看解析' : '分析' }}
               </BaseButton>
@@ -193,10 +208,12 @@ function formatTime(dateStr: string) {
 }
 
 function viewDetail(item: WrongAnswerListItem) {
+  router.push(`/wrong-answers/${item.questionId}`)
+}
+
+function goToArticle(item: WrongAnswerListItem) {
   if (item.articleId) {
     router.push(`/reading?articleId=${item.articleId}&focusQuestion=${item.questionId}`)
-  } else {
-    router.push(`/wrong-answers/${item.questionId}`)
   }
 }
 
