@@ -18,8 +18,8 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center">
-        <span class="text-indigo-600 font-bold text-xl">{{ stats.totalArticlesRead }}</span>
-        <span class="text-slate-400 text-[11px] uppercase tracking-wider">已读文章</span>
+        <span class="text-indigo-600 font-bold text-xl">{{ stats.totalArticlesPracticed }}</span>
+        <span class="text-slate-400 text-[11px] uppercase tracking-wider">练习文章</span>
       </div>
       <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center">
         <span class="text-indigo-600 font-bold text-xl">{{ stats.totalQuestionsAnswered }}</span>
@@ -98,9 +98,13 @@ const showEditProfile = ref(false)
 const showAccountSecurity = ref(false)
 
 const stats = ref<UserStats>({
-  totalArticlesRead: 0,
+  totalArticlesPracticed: 0,
   totalQuestionsAnswered: 0,
-  correctRate: 0
+  correctRate: 0,
+  wrongAnswersCount: 0,
+  pendingReviewCount: 0,
+  lastPracticeTime: null,
+  recentArticles: []
 })
 
 const initials = computed(() => (user.value?.nickname || user.value?.username || '用户').slice(0, 1).toUpperCase())
