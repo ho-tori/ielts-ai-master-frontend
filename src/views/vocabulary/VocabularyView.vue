@@ -52,7 +52,7 @@
 import { ref, onMounted } from 'vue'
 import { BaseCard, BaseButton, Loading, Empty } from '@/components'
 import VocabularyItemCard from './components/VocabularyItemCard.vue'
-import { apiGenerateVocabulary, apiGetVocabularyList, apiGetClusters, apiDeleteVocabulary } from '@/api/vocabulary'
+import { apiGenerateVocabulary, apiGetGenerationStatus, apiGetVocabularyList, apiGetClusters, apiDeleteVocabulary } from '@/api/vocabulary'
 import type { VocabularyItem, ClusterInfo } from '@/types/vocabulary'
 
 const loading = ref(false)
@@ -86,20 +86,75 @@ async function fetchList(cluster?: string) {
   }
 }
 
+let pollTimer: ReturnType<typeof setInterval> | null = null
+
+onMounted(() => {
+  fetchClusters()
+  fetchList()
+  // 检查是否有正在进行的生成任务
+  checkPendingGeneration()
+})
+
+async function checkPendingGeneration() {
+  try {
+    const { data } = await apiGetGenerationStatus()
+    if (data.code === 0 && data.data?.status === 'generating') {
+      generating.value = true
+      startPolling()
+    }
+  } catch { /* ignore */ }
+}
+
 async function generateVocab() {
   generating.value = true
   try {
     const { data } = await apiGenerateVocabulary()
-    if (data.code === 0) {
-      await fetchClusters()
-      await fetchList()
+    if (data.code === 0 && data.data?.status === 'generating') {
+      startPolling()
+    } else if (data.code !== 0) {
+      alert(data.message || '生成失败')
+      generating.value = false
     }
   } catch (e: any) {
-    const msg = e?.response?.data?.message || '生成失败'
-    alert(msg)
-  } finally {
+    alert(e?.response?.data?.message || '请求失败，请稍后重试')
     generating.value = false
   }
+}
+
+function startPolling() {
+  if (pollTimer) clearInterval(pollTimer)
+  let attempts = 0
+  pollTimer = setInterval(async () => {
+    attempts++
+    try {
+      const { data } = await apiGetGenerationStatus()
+      if (data.code !== 0) return
+
+      const status = data.data?.status
+      if (status === 'done') {
+        clearInterval(pollTimer!)
+        pollTimer = null
+        generating.value = false
+        await fetchClusters()
+        await fetchList()
+      } else if (status?.startsWith('error')) {
+        clearInterval(pollTimer!)
+        pollTimer = null
+        generating.value = false
+        alert(data.data?.message || '生成失败，请重试')
+      } else if (attempts > 60) {
+        // 3分钟超时
+        clearInterval(pollTimer!)
+        pollTimer = null
+        generating.value = false
+        alert('生成超时，请刷新页面查看结果')
+        await fetchClusters()
+        await fetchList()
+      }
+    } catch {
+      // 轮询失败，继续重试
+    }
+  }, 3000) // 每3秒轮询一次
 }
 
 async function handleDelete(id: number) {
@@ -114,9 +169,4 @@ function filterByCluster(name: string) {
   selectedCluster.value = name
   fetchList(name || undefined)
 }
-
-onMounted(() => {
-  fetchClusters()
-  fetchList()
-})
 </script>

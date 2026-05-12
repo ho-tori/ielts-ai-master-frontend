@@ -18,7 +18,11 @@ export interface ClusterInfo {
 }
 
 export function apiGenerateVocabulary() {
-  return request.post<ApiResponse<VocabularyItem[]>>('/vocabulary/generate')
+  return request.post<ApiResponse<{ status: string }>>('/vocabulary/generate', {}, { timeout: 10000 })
+}
+
+export function apiGetGenerationStatus() {
+  return request.get<ApiResponse<{ status: string; message?: string }>>('/vocabulary/generate/status')
 }
 
 export function apiGetVocabularyList(cluster?: string) {
