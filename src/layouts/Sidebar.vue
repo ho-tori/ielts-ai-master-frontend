@@ -13,7 +13,9 @@ const menuItems = [
   { name: 'Dashboard', path: '/', icon: 'heroicons:chart-bar' },
   { name: 'Reading', path: '/reading', icon: 'heroicons:book-open' },
   { name: 'Practice', path: '/practice', icon: 'heroicons:pencil-square' },
-  { name: 'Lab', path: '/lab', icon: 'heroicons:beaker' }
+  { name: 'Wrong Answers', path: '/wrong-answers', icon: 'heroicons:exclamation-triangle' },
+  { name: 'Vocabulary', path: '/vocabulary', icon: 'heroicons:bookmark' },
+  { name: 'Training', path: '/training', icon: 'heroicons:bolt' }
 ];
 
 const visibleMenuItems = computed(() => {

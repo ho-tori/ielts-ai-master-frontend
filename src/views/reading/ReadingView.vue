@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import ArticleSection from './components/ArticleSection.vue'
 import ReadingBottomNavigator from './components/ReadingBottomNavigator.vue'
 import ReadingToolPanel from './components/ReadingToolPanel.vue'
-import { getArticleDetail } from '@/api/article'
+import { getArticleDetail, submitAnswer } from '@/api/article'
 import { useUserStore } from '@/stores/user'
 import type { RecentArticle, Article } from '../../types/article'
 
@@ -232,12 +232,35 @@ function updateAnswer(questionId: number, answer: string) {
   selectedAnswers.value[questionId] = answer
 }
 
-// 提交答题：当前仅做前端结果态切换，后续可接入后端评分接口
-function handleSubmit() {
+// 记录错题questionId列表
+const wrongQuestionIds = ref<number[]>([])
+
+// 提交答题：调用后端评分接口，记录错题
+async function handleSubmit() {
   if (Object.keys(selectedAnswers.value).length === 0) {
     alert('请先回答问题')
     return
   }
+
+  const questions = articleFromApi.value?.questions || []
+  wrongQuestionIds.value = []
+
+  for (const q of questions) {
+    const userAnswer = selectedAnswers.value[q.id]
+    if (!userAnswer) continue
+    try {
+      const { data } = await submitAnswer(q.id, {
+        questionId: q.id,
+        userAnswer: userAnswer
+      })
+      if (data.code === 0 && data.data?.needAnalysis) {
+        wrongQuestionIds.value.push(q.id)
+      }
+    } catch (e) {
+      console.error('提交答案失败: questionId=' + q.id, e)
+    }
+  }
+
   showResults.value = true
 }
 
@@ -391,6 +414,20 @@ watch(
         @select-recent="handleSelectRecentArticle"
         @toggle-translation="handleToggleTranslation"
       />
+
+      <!-- 提交后有错题时显示分析入口 -->
+      <div
+        v-if="showResults && wrongQuestionIds.length > 0"
+        class="fixed bottom-20 right-6 z-30"
+      >
+        <router-link
+          :to="`/wrong-answers/${wrongQuestionIds[0]}`"
+          class="inline-flex items-center gap-2 px-4 py-3 bg-primary text-white rounded-lg shadow-lg hover:bg-primary-hover transition-colors text-sm font-medium"
+        >
+          <span>📊</span>
+          <span>查看AI错题解析 ({{ wrongQuestionIds.length }}题)</span>
+        </router-link>
+      </div>
     </div>
   </div>
 </template>
