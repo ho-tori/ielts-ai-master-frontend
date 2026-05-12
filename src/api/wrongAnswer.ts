@@ -4,11 +4,24 @@ import type { ApiResponse } from '../types/api'
 export interface WrongAnswerListItem {
   analysisId: number | null
   questionId: number
+  articleId: number | null
   questionStem: string
   articleTitle: string
   errorTypes: string[]
   hasAnalysis: boolean
   createTime: string
+}
+
+export interface AnswerHistoryItem {
+  questionId: number
+  articleId: number | null
+  articleTitle: string
+  questionStem: string
+  userAnswer: string
+  correctAnswer: string
+  isCorrect: boolean
+  hasAnalysis: boolean
+  answerTime: string
 }
 
 export interface AnalysisDetail {
@@ -43,17 +56,6 @@ export function apiGetWrongAnswerList(page: number = 0, size: number = 10) {
   return request.get<ApiResponse<WrongAnswerListItem[]>>('/wrong-answers/list', {
     params: { page, size }
   })
-}
-
-export interface AnswerHistoryItem {
-  questionId: number
-  articleTitle: string
-  questionStem: string
-  userAnswer: string
-  correctAnswer: string
-  isCorrect: boolean
-  hasAnalysis: boolean
-  answerTime: string
 }
 
 export function apiGetAnswerHistory(page: number = 0, size: number = 50) {

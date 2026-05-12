@@ -137,7 +137,7 @@
                 v-if="!item.isCorrect"
                 variant="secondary"
                 size="sm"
-                @click="$router.push(`/wrong-answers/${item.questionId}`)"
+                @click="item.articleId ? $router.push(`/reading?articleId=${item.articleId}&focusQuestion=${item.questionId}`) : $router.push(`/wrong-answers/${item.questionId}`)"
               >
                 {{ item.hasAnalysis ? '查看解析' : '分析' }}
               </BaseButton>
@@ -193,7 +193,11 @@ function formatTime(dateStr: string) {
 }
 
 function viewDetail(item: WrongAnswerListItem) {
-  router.push(`/wrong-answers/${item.questionId}`)
+  if (item.articleId) {
+    router.push(`/reading?articleId=${item.articleId}&focusQuestion=${item.questionId}`)
+  } else {
+    router.push(`/wrong-answers/${item.questionId}`)
+  }
 }
 
 async function switchPeriod(period: string) {

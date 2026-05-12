@@ -1,6 +1,7 @@
 export interface WrongAnswerListItem {
   analysisId: number | null
   questionId: number
+  articleId: number | null
   questionStem: string
   articleTitle: string
   errorTypes: string[]

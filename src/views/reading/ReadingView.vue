@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ArticleSection from './components/ArticleSection.vue'
 import ReadingBottomNavigator from './components/ReadingBottomNavigator.vue'
@@ -195,6 +195,13 @@ const fetchArticleFromApi = async (articleId: number) => {
       articleFromApi.value = data.data
       userStore.addRecentArticle(articleId)
       loadHighlightsAndNotes(articleId)
+      // 如果URL带了focusQuestion参数，自动定位到该题
+      const focusQ = route.query.focusQuestion
+      if (focusQ) {
+        nextTick(() => {
+          focusedQuestionId.value = Number(focusQ)
+        })
+      }
     } else {
       error.value = data.message || '获取文章失败'
     }
@@ -502,6 +509,33 @@ watch(
       <div class="text-center">
         <p class="text-text-secondary mb-2">{{ error }}</p>
         <p class="text-sm text-text-secondary/80">请检查习题 ID 或返回练习中心重新选择</p>
+      </div>
+    </div>
+
+    <!-- 空状态：没有加载文章 -->
+    <div v-else-if="!currentArticle" class="flex items-center justify-center h-full">
+      <div class="text-center max-w-md">
+        <div class="text-6xl mb-4">📖</div>
+        <h3 class="text-xl font-bold text-text-primary mb-2">准备开始阅读练习</h3>
+        <p class="text-text-secondary text-sm mb-6">
+          从练习中心选择一篇文章开始答题，AI 会帮你分析错题、提取生词、生成专项训练。
+        </p>
+        <div class="flex gap-3 justify-center">
+          <BaseButton variant="primary" @click="$router.push('/practice')">去练习中心</BaseButton>
+          <BaseButton variant="secondary" @click="$router.push('/wrong-answers')">查看错题本</BaseButton>
+        </div>
+        <div v-if="recentArticles.length > 0" class="mt-8 text-left">
+          <p class="text-xs text-text-secondary mb-3">最近阅读过的文章</p>
+          <div
+            v-for="item in recentArticles.slice(0, 3)"
+            :key="item.id"
+            class="flex items-center justify-between p-2 rounded-lg hover:bg-surface-muted cursor-pointer transition-colors"
+            @click="$router.push(`/reading?articleId=${item.id}`)"
+          >
+            <span class="text-sm text-text-primary truncate">{{ item.title }}</span>
+            <span class="text-xs text-text-secondary shrink-0 ml-2">{{ item.examType }}</span>
+          </div>
+        </div>
       </div>
     </div>
 
