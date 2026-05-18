@@ -237,13 +237,11 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { apiGetUserStats } from '@/api/stats'
 import { BaseButton } from '@/components'
 import type { UserStats } from '@/types/user'
 
-const router = useRouter()
 const userStore = useUserStore()
 const loading = ref(false)
 const stats = ref<UserStats | null>(null)

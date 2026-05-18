@@ -281,10 +281,8 @@ async function addHighlight(color?: string) {
     }, color || '#ffeb3b')
     if (data.code === 0) {
       // 添加到本地状态
-      if (!highlights.value[ctx.paragraphNumber]) {
-        highlights.value[ctx.paragraphNumber] = []
-      }
-      highlights.value[ctx.paragraphNumber].push({
+      const paragraphHighlights = (highlights.value[ctx.paragraphNumber] ??= [])
+      paragraphHighlights.push({
         startOffset: ctx.startOffset,
         endOffset: ctx.endOffset,
         color: color || '#ffeb3b',
@@ -359,8 +357,8 @@ async function loadHighlightsAndNotes(articleId: number) {
     for (const item of data.data || []) {
       if (item.type === 'highlight' && item.position) {
         const pos = item.position as any
-        if (!hlMap[item.paragraphNumber]) hlMap[item.paragraphNumber] = []
-        hlMap[item.paragraphNumber].push({
+        const ranges = (hlMap[item.paragraphNumber] ??= [])
+        ranges.push({
           startOffset: pos.startOffset || 0,
           endOffset: pos.endOffset || 0,
           color: item.highlightColor,

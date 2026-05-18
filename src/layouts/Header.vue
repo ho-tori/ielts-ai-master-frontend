@@ -46,7 +46,7 @@ const fetchStreakDays = async () => {
   try {
     const { data } = await apiGetUserStats()
     if (data.code === 0) {
-      streakDays.value = data.data.totalArticlesRead || 0
+      streakDays.value = data.data.totalArticlesPracticed || 0
     }
   } catch (e) {
     console.warn('获取连续学习天数失败', e)

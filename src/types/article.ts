@@ -47,6 +47,8 @@ export interface ArticleListItem {
 	examType: string
 	difficulty: string
 	topics?: Topic[]
+	paragraphs?: Paragraph[]
+	questions?: Question[]
 }
 
 export interface RecentArticle {
@@ -77,7 +79,9 @@ export interface SubmitAnswerRequest {
 }
 
 export interface SubmitAnswerResponse {
+	questionId?: number
 	isCorrect: boolean
 	correctAnswer: string
 	analysis: string
+	needAnalysis?: boolean
 }

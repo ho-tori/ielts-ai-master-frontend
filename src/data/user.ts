@@ -62,9 +62,13 @@ export const mockCurrentUser: User = {
 }
 
 export const mockUserStats: UserStats = {
-  totalArticlesRead: 45,
+  totalArticlesPracticed: 45,
   totalQuestionsAnswered: 328,
-  correctRate: 87
+  correctRate: 87,
+  wrongAnswersCount: 43,
+  pendingReviewCount: 6,
+  lastPracticeTime: null,
+  recentArticles: []
 }
 
 export const mockUserProfile: UserProfile = {

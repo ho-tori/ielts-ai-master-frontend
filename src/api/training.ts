@@ -8,13 +8,17 @@ export interface TrainingItem {
     options: Array<{ label: string; content: string }>
     answer: string
     analysis: string
+    userCorrect?: boolean
+    userAnswer?: string
   }
   synonymQuestion: {
     stem: string
     options: Array<{ label: string; content: string }>
     answer: string
     analysis: string
-    distractorDesign: Record<string, string>
+    distractorDesign?: Record<string, string>
+    userCorrect?: boolean
+    userAnswer?: string
   }
   userCorrect?: boolean
   userAnswer?: string
@@ -26,7 +30,7 @@ export interface TrainingSession {
   focusPoint: string
   description: string
   items: TrainingItem[]
-  score?: number
+  score?: number | null
   completed: boolean
   createTime: string
 }

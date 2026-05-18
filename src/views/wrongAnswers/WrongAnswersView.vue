@@ -213,7 +213,7 @@ function viewDetail(item: WrongAnswerListItem) {
   router.push(`/wrong-answers/${item.questionId}`)
 }
 
-function goToArticle(item: WrongAnswerListItem) {
+function goToArticle(item: Pick<WrongAnswerListItem, 'articleId' | 'questionId'>) {
   console.log('回原文: articleId=' + item.articleId + ', questionId=' + item.questionId)
   if (item.articleId) {
     router.push(`/reading?articleId=${item.articleId}&focusQuestion=${item.questionId}`)

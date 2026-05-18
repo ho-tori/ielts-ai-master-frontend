@@ -66,7 +66,7 @@ function getSegments(content: string, paraNum: number): TextSegment[] {
   return segments
 }
 
-function handleMouseUp(event: MouseEvent) {
+function handleMouseUp() {
   const selection = window.getSelection()
   if (!selection || selection.isCollapsed) return
   const text = selection.toString().trim()

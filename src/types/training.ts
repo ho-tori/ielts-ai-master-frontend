@@ -12,6 +12,8 @@ export interface TrainingQuestion {
   answer: string
   analysis: string
   distractorDesign?: Record<string, string>
+  userCorrect?: boolean
+  userAnswer?: string
 }
 
 export interface TrainingSession {
@@ -20,7 +22,7 @@ export interface TrainingSession {
   focusPoint: string
   description: string
   items: TrainingItem[]
-  score?: number
+  score?: number | null
   completed: boolean
   createTime: string
 }

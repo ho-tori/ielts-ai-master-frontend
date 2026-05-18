@@ -172,14 +172,16 @@ const resultBgClass = computed(() => {
   return 'bg-danger/10'
 })
 
-function scoreClass(score: number | null) {
-  if (score === null) return 'text-text-secondary'
+type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'ghost' | 'danger' | 'success'
+
+function scoreClass(score: number | null | undefined) {
+  if (score === null || score === undefined) return 'text-text-secondary'
   if (score >= 80) return 'text-success'
   if (score >= 60) return 'text-primary'
   return 'text-danger'
 }
 
-function getVariant(userAnswer: string | undefined, optionLabel: string, correctAnswer: string, show: boolean): string {
+function getVariant(userAnswer: string | undefined, optionLabel: string, correctAnswer: string, show: boolean): ButtonVariant {
   if (show) {
     if (optionLabel === correctAnswer) return 'success'
     if (optionLabel === userAnswer && optionLabel !== correctAnswer) return 'danger'
@@ -211,13 +213,15 @@ async function handleSubmit() {
       if (result.items) {
         for (let i = 0; i < session.value.items.length && i < result.items.length; i++) {
           const s = result.items[i]
+          const item = session.value.items[i]
+          if (!s || !item) continue
           if (s.locateQuestion) {
-            session.value.items[i].locateQuestion.userCorrect = s.locateQuestion.userCorrect
-            session.value.items[i].locateQuestion.userAnswer = s.locateQuestion.userAnswer
+            item.locateQuestion.userCorrect = s.locateQuestion.userCorrect
+            item.locateQuestion.userAnswer = s.locateQuestion.userAnswer
           }
           if (s.synonymQuestion) {
-            session.value.items[i].synonymQuestion.userCorrect = s.synonymQuestion.userCorrect
-            session.value.items[i].synonymQuestion.userAnswer = s.synonymQuestion.userAnswer
+            item.synonymQuestion.userCorrect = s.synonymQuestion.userCorrect
+            item.synonymQuestion.userAnswer = s.synonymQuestion.userAnswer
           }
         }
       }
