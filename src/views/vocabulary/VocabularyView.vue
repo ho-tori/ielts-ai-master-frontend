@@ -1,5 +1,5 @@
 <template>
-  <div class="app-page">
+  <div class="app-page vocabulary-page">
     <PageHeader
       title="智能生词本"
       description="按固定语义标签整理错题中的同义替换和高频表达。"
@@ -7,6 +7,7 @@
       <template #actions>
         <BaseButton
           variant="primary"
+          class="vocabulary-action"
           :loading="generating"
           :disabled="generating"
           @click="generateVocab"
@@ -17,10 +18,12 @@
       </template>
     </PageHeader>
 
-    <div v-if="clusters.length > 0" class="surface-panel-muted overflow-x-auto p-2">
+    <div v-if="clusters.length > 0" class="surface-panel-muted vocabulary-filter-panel overflow-x-auto p-2">
       <div class="flex min-w-max items-center gap-2">
         <BaseButton
           :variant="selectedCluster === '' ? 'primary' : 'ghost'"
+          class="vocabulary-filter"
+          :class="{ 'is-active': selectedCluster === '' }"
           size="sm"
           @click="filterByCluster('')"
         >全部 {{ totalCount }}</BaseButton>
@@ -28,6 +31,8 @@
           v-for="c in clusters"
           :key="c.name"
           :variant="selectedCluster === c.name ? 'primary' : 'ghost'"
+          class="vocabulary-filter"
+          :class="{ 'is-active': selectedCluster === c.name }"
           size="sm"
           @click="filterByCluster(c.name)"
         >{{ c.name }} {{ c.count }}</BaseButton>
@@ -183,3 +188,31 @@ function filterByCluster(name: string) {
   fetchList(name || undefined)
 }
 </script>
+
+<style scoped>
+:global(html[data-theme='mono']) .vocabulary-action {
+  background-color: rgb(var(--color-vocabulary-accent));
+  box-shadow: 0 10px 22px rgb(var(--color-vocabulary-accent) / 0.18);
+}
+
+:global(html[data-theme='mono']) .vocabulary-action:hover {
+  background-color: rgb(234 88 12);
+}
+
+:global(html[data-theme='mono']) .vocabulary-filter-panel {
+  background-color: rgb(var(--color-vocabulary-muted) / 0.12);
+  border-color: rgb(var(--color-vocabulary-muted) / 0.72);
+}
+
+:global(html[data-theme='mono']) .vocabulary-filter.is-active {
+  background-color: rgb(var(--color-vocabulary-accent));
+  border-color: rgb(var(--color-vocabulary-accent));
+  color: rgb(255 255 255);
+  box-shadow: 0 8px 18px rgb(var(--color-vocabulary-accent) / 0.18);
+}
+
+:global(html[data-theme='mono']) .vocabulary-filter:not(.is-active):hover {
+  background-color: rgb(var(--color-vocabulary-muted) / 0.18);
+  color: rgb(var(--color-text-primary));
+}
+</style>

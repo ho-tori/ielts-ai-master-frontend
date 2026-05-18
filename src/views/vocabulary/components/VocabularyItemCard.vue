@@ -2,11 +2,11 @@
   <BaseCard>
     <div class="flex items-start justify-between gap-4">
       <div class="min-w-0 flex-1">
-        <span class="inline-flex rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">{{ item.semanticCluster }}</span>
-        <div class="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-border/60 bg-surface-muted/60 px-3 py-3">
+        <span class="vocab-badge inline-flex rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">{{ item.semanticCluster }}</span>
+        <div class="vocab-pair-panel mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-border/60 bg-surface-muted/60 px-3 py-3">
           <span class="text-base font-semibold text-text-primary">{{ item.word }}</span>
-          <Icon icon="heroicons:arrow-right" class="text-primary" />
-          <span class="text-base font-semibold text-primary">{{ item.questionReplacement }}</span>
+          <Icon icon="heroicons:arrow-right" class="vocab-arrow text-primary" />
+          <span class="vocab-replacement text-base font-semibold text-primary">{{ item.questionReplacement }}</span>
         </div>
       </div>
       <BaseButton variant="ghost" size="sm" @click="$emit('delete')" title="删除" aria-label="删除生词">
@@ -14,7 +14,7 @@
       </BaseButton>
     </div>
 
-    <div v-if="item.sourceSentence" class="mt-4 rounded-lg border-l-4 border-primary/30 bg-surface-muted/55 px-3 py-3">
+    <div v-if="item.sourceSentence" class="vocab-source mt-4 rounded-lg border-l-4 border-primary/30 bg-surface-muted/55 px-3 py-3">
       <p class="text-sm italic leading-6 text-text-secondary">
         {{ item.sourceSentence }}
       </p>
@@ -22,7 +22,7 @@
 
     <div v-if="item.synonyms && item.synonyms.length > 0" class="mt-4 flex flex-wrap items-center gap-2">
       <span class="text-xs font-medium text-text-secondary">近义词</span>
-      <span v-for="s in item.synonyms" :key="s" class="rounded-md bg-surface-muted px-2 py-1 text-xs text-text-secondary">{{ s }}</span>
+      <span v-for="s in item.synonyms" :key="s" class="vocab-synonym rounded-md bg-surface-muted px-2 py-1 text-xs text-text-secondary">{{ s }}</span>
     </div>
 
     <div v-if="item.exampleSentences && item.exampleSentences.length > 0" class="mt-4 space-y-2 text-xs leading-5 text-text-secondary">
@@ -45,3 +45,31 @@ import type { VocabularyItem } from '@/types/vocabulary'
 defineProps<{ item: VocabularyItem }>()
 defineEmits<{ (e: 'delete'): void }>()
 </script>
+
+<style scoped>
+:global(html[data-theme='mono']) .vocab-badge {
+  background-color: rgb(var(--color-vocabulary-accent) / 0.12);
+  color: rgb(var(--color-text-primary));
+  box-shadow: inset 0 0 0 1px rgb(var(--color-vocabulary-accent) / 0.32);
+}
+
+:global(html[data-theme='mono']) .vocab-pair-panel {
+  background-color: rgb(var(--color-vocabulary-muted) / 0.14);
+  border-color: rgb(var(--color-vocabulary-muted) / 0.72);
+}
+
+:global(html[data-theme='mono']) .vocab-arrow,
+:global(html[data-theme='mono']) .vocab-replacement {
+  color: rgb(var(--color-vocabulary-accent));
+}
+
+:global(html[data-theme='mono']) .vocab-source {
+  background-color: rgb(var(--color-vocabulary-muted) / 0.12);
+  border-left-color: rgb(var(--color-vocabulary-accent));
+}
+
+:global(html[data-theme='mono']) .vocab-synonym {
+  background-color: rgb(var(--color-vocabulary-muted) / 0.18);
+  color: rgb(var(--color-text-primary));
+}
+</style>
