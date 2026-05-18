@@ -3,11 +3,13 @@
     <div class="surface-panel overflow-hidden">
       <div class="flex flex-col gap-6 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
         <div class="flex min-w-0 items-center gap-4">
-          <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border border-primary/15 bg-primary/10 text-2xl font-semibold text-primary">
-            <span v-if="userStore.user?.nickname || userStore.user?.username">
-              {{ (userStore.user?.nickname || userStore.user?.username || '').slice(0, 1).toUpperCase() }}
-            </span>
-            <Icon v-else icon="heroicons:user" class="text-2xl" />
+          <div class="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-primary/15 bg-primary/10">
+            <img
+              :src="avatarSrc"
+              alt="用户头像"
+              class="h-full w-full object-cover"
+              @error="handleAvatarError"
+            >
           </div>
           <div class="min-w-0">
             <p class="section-label mb-1">今日学习概览</p>
@@ -264,6 +266,15 @@ import type { UserStats } from '@/types/user'
 const userStore = useUserStore()
 const loading = ref(false)
 const stats = ref<UserStats | null>(null)
+const DEFAULT_AVATAR_SRC = '/images/default-avatar.jpg'
+
+const avatarSrc = computed(() => userStore.user?.avatar || DEFAULT_AVATAR_SRC)
+
+function handleAvatarError(event: Event) {
+  const img = event.currentTarget as HTMLImageElement
+  if (img.src.endsWith(DEFAULT_AVATAR_SRC)) return
+  img.src = DEFAULT_AVATAR_SRC
+}
 
 const correctCount = computed(() => {
   if (!stats.value) return 0

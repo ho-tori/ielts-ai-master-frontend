@@ -9,9 +9,12 @@
         </div>
       </template>
       <div class="flex flex-col items-center">
-        <div class="w-24 h-24 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-2xl">
-          {{ initials }}
-        </div>
+        <img
+          :src="avatarSrc"
+          alt="用户头像"
+          class="h-24 w-24 rounded-lg border border-primary/20 bg-primary/10 object-cover shadow-sm"
+          @error="handleAvatarError"
+        >
         <h3 class="mt-3 text-xl font-bold text-text-primary">{{ user?.nickname || user?.username || '用户' }}</h3>
         <p class="text-text-secondary text-sm">{{ user?.email || '未设置邮箱' }}</p>
       </div>
@@ -97,6 +100,15 @@ const user = computed(() => userStore.user)
 
 const showEditProfile = ref(false)
 const showAccountSecurity = ref(false)
+const DEFAULT_AVATAR_SRC = '/images/default-avatar.jpg'
+
+const avatarSrc = computed(() => user.value?.avatar || DEFAULT_AVATAR_SRC)
+
+function handleAvatarError(event: Event) {
+  const img = event.currentTarget as HTMLImageElement
+  if (img.src.endsWith(DEFAULT_AVATAR_SRC)) return
+  img.src = DEFAULT_AVATAR_SRC
+}
 
 const stats = ref<UserStats>({
   totalArticlesPracticed: 0,
@@ -107,8 +119,6 @@ const stats = ref<UserStats>({
   lastPracticeTime: null,
   recentArticles: []
 })
-
-const initials = computed(() => (user.value?.nickname || user.value?.username || '用户').slice(0, 1).toUpperCase())
 
 async function handleSaveProfile(data: { nickname: string; email: string }) {
   try {

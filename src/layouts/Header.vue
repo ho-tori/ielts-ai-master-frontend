@@ -20,7 +20,13 @@
         {{ themeLabel }}
       </BaseButton>
       <BaseButton variant="ghost" size="sm" @click="goAccount" title="个人信息" aria-label="个人信息">
-        <Icon icon="heroicons:cog-6-tooth" class="text-text-secondary text-xl" />
+        <img
+          :src="avatarSrc"
+          alt=""
+          aria-hidden="true"
+          class="h-8 w-8 rounded-lg border border-border/70 object-cover"
+          @error="handleAvatarError"
+        >
       </BaseButton>
     </div>
   </header>
@@ -39,6 +45,15 @@ const router = useRouter()
 const userStore = useUserStore()
 const themeStore = useThemeStore()
 const streakDays = ref(0)
+const DEFAULT_AVATAR_SRC = '/images/default-avatar.jpg'
+
+const avatarSrc = computed(() => userStore.user?.avatar || DEFAULT_AVATAR_SRC)
+
+function handleAvatarError(event: Event) {
+  const img = event.currentTarget as HTMLImageElement
+  if (img.src.endsWith(DEFAULT_AVATAR_SRC)) return
+  img.src = DEFAULT_AVATAR_SRC
+}
 
 const themeLabel = computed(() => {
   if (themeStore.currentTheme === 'light') return 'Ocean'
