@@ -1,6 +1,6 @@
 :root,
 html[data-theme='light'] {
-  --font-app: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-app: "思源宋体", "Source Han Serif SC", "Noto Serif CJK SC", "Noto Serif SC", "Songti SC", SimSun, serif;
   --color-primary: 37 99 235;
   --color-primary-hover: 30 64 175;
   --color-accent: 13 148 136;
@@ -22,7 +22,7 @@ html[data-theme='light'] {
 }
 
 html[data-theme='ocean'] {
-  --font-app: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-app: "思源宋体", "Source Han Serif SC", "Noto Serif CJK SC", "Noto Serif SC", "Songti SC", SimSun, serif;
   --color-primary: 8 145 178;
   --color-primary-hover: 14 116 144;
   --color-accent: 79 70 229;
@@ -44,7 +44,7 @@ html[data-theme='ocean'] {
 }
 
 html[data-theme='mono'] {
-  --font-app: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-app: "思源宋体", "Source Han Serif SC", "Noto Serif CJK SC", "Noto Serif SC", "Songti SC", SimSun, serif;
   --color-primary: 0 0 0;
   --color-primary-hover: 32 32 32;
   --color-accent: 255 110 5;
