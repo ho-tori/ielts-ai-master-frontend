@@ -1,141 +1,381 @@
 <template>
-  <div class="space-y-6">
-    <!-- Welcome Banner -->
-    <BaseCard>
-      <div class="flex items-center justify-between">
-        <div>
-          <h2 class="text-2xl font-bold text-text-primary">欢迎回来！</h2>
-          <p class="text-text-secondary mt-1">继续你的雅思阅读之旅</p>
+  <div class="app-page">
+    <div class="surface-panel overflow-hidden">
+      <div class="flex flex-col gap-6 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex min-w-0 items-center gap-4">
+          <div class="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-primary/15 bg-primary/10">
+            <img
+              :src="avatarSrc"
+              alt="用户头像"
+              class="h-full w-full object-cover"
+              @error="handleAvatarError"
+            >
+          </div>
+          <div class="min-w-0">
+            <p class="section-label mb-1">今日学习概览</p>
+            <h2 class="text-2xl font-semibold leading-tight text-text-primary">
+              欢迎回来，{{ userStore.user?.nickname || userStore.user?.username || '同学' }}
+            </h2>
+            <p class="mt-1 text-sm leading-6 text-text-secondary">把阅读、错题和词汇复盘放在同一条学习路径里。</p>
+            <p v-if="stats?.lastPracticeTime" class="mt-2 flex items-center gap-1.5 text-xs text-text-secondary">
+              <Icon icon="heroicons:clock" class="text-primary" />
+              最近练习 {{ stats.lastPracticeTime }}
+            </p>
+          </div>
         </div>
-        <div class="text-5xl">📚</div>
+        <div class="flex flex-col gap-2 sm:flex-row">
+          <BaseButton variant="secondary" @click="$router.push('/wrong-answers')">
+            <Icon icon="heroicons:clipboard-document-check" />
+            复盘错题
+          </BaseButton>
+          <BaseButton variant="primary" @click="$router.push('/practice')">
+            <Icon icon="heroicons:play" />
+            开始练习
+          </BaseButton>
+        </div>
       </div>
-    </BaseCard>
-
-    <!-- Quick Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <BaseCard>
-        <div class="text-center">
-          <div class="text-3xl font-bold text-primary">{{ totalArticles }}</div>
-          <p class="text-text-secondary text-sm mt-2">已完成文章</p>
-        </div>
-      </BaseCard>
-      <BaseCard>
-        <div class="text-center">
-          <div class="text-3xl font-bold text-success">{{ totalVocab }}</div>
-          <p class="text-text-secondary text-sm mt-2">掌握词汇</p>
-        </div>
-      </BaseCard>
-      <BaseCard>
-        <div class="text-center">
-          <div class="text-3xl font-bold text-success">{{ streakDays }}</div>
-          <p class="text-text-secondary text-sm mt-2">连续学习天数</p>
-        </div>
-      </BaseCard>
     </div>
 
-    <!-- Recent Articles -->
-    <BaseCard>
-      <template #header>
-        <h3 class="font-bold text-text-primary">最近练习 <span class="text-xs text-text-secondary/70 font-normal">（最近5条）</span></h3>
-      </template>
-      <div v-if="loading" class="flex justify-center py-4">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    <section class="surface-panel overflow-hidden">
+      <div class="grid lg:grid-cols-[minmax(0,1.22fr)_minmax(320px,0.78fr)]">
+        <div class="border-b border-border/50 bg-surface-muted/30 p-5 sm:p-6 lg:border-b-0 lg:border-r">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div class="min-w-0">
+              <p class="section-label mb-2">学习进度</p>
+              <h3 class="text-xl font-semibold leading-tight text-text-primary">阅读表现稳定度</h3>
+              <p class="mt-1 max-w-2xl text-sm leading-6 text-text-secondary">
+                用正确率和累计练习量判断当前节奏，优先处理还没复盘的错题。
+              </p>
+            </div>
+            <BaseButton variant="secondary" size="sm" @click="$router.push('/wrong-answers')">
+              查看错题
+              <Icon icon="heroicons:arrow-right" />
+            </BaseButton>
+          </div>
+
+          <div class="mt-6 flex flex-col gap-6 md:flex-row md:items-end">
+            <div class="flex items-center gap-4">
+              <div class="relative flex h-28 w-28 shrink-0 items-center justify-center">
+                <svg class="h-28 w-28 -rotate-90" viewBox="0 0 120 120" aria-hidden="true">
+                  <circle cx="60" cy="60" r="48" fill="none" stroke="currentColor" stroke-width="10" class="text-border/55" />
+                  <circle
+                    cx="60"
+                    cy="60"
+                    r="48"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="10"
+                    :class="correctRateRingClass"
+                    :stroke-dasharray="`${correctRateValue * 3.02} 302`"
+                    stroke-linecap="round"
+                  />
+                </svg>
+                <div class="absolute text-center">
+                  <div class="flex items-baseline justify-center gap-0.5">
+                    <span class="text-3xl font-semibold tabular-nums" :class="correctRateClass">{{ correctRateValue }}</span>
+                    <span class="text-sm text-text-secondary">%</span>
+                  </div>
+                  <p class="mt-0.5 text-[11px] font-medium text-text-secondary">正确率</p>
+                </div>
+              </div>
+
+              <div class="min-w-0">
+                <p class="text-sm font-semibold text-text-primary">{{ correctRateSummary }}</p>
+                <p class="mt-2 text-sm leading-6 text-text-secondary">
+                  已答 {{ stats?.totalQuestionsAnswered || 0 }} 题，其中 {{ correctCount }} 题正确。
+                </p>
+              </div>
+            </div>
+
+            <div class="min-w-0 flex-1">
+              <div class="mb-2 flex items-center justify-between gap-3 text-xs font-medium text-text-secondary">
+                <span>答题表现</span>
+                <span class="tabular-nums">{{ correctRateValue }}/100</span>
+              </div>
+              <div class="h-3 w-full overflow-hidden rounded-full bg-surface shadow-[inset_0_1px_2px_rgb(15_23_42_/_0.08)]">
+                <div
+                  class="h-full rounded-full transition-all duration-700"
+                  :class="correctRateBarClass"
+                  :style="{ width: `${correctRateValue}%` }"
+                />
+              </div>
+              <div class="mt-4 flex flex-wrap gap-2 text-xs text-text-secondary">
+                <span class="rounded-full border border-border/60 bg-surface px-3 py-1">文章 {{ stats?.totalArticlesPracticed || 0 }} 篇</span>
+                <span class="rounded-full border border-border/60 bg-surface px-3 py-1">错题 {{ stats?.wrongAnswersCount || 0 }} 题</span>
+                <span class="rounded-full border border-border/60 bg-surface px-3 py-1">待复习 {{ stats?.pendingReviewCount || 0 }} 题</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid divide-y divide-border/45 sm:grid-cols-3 sm:divide-x sm:divide-y-0 lg:grid-cols-1 lg:divide-x-0 lg:divide-y">
+          <div class="flex min-h-[112px] items-center gap-3 p-5">
+            <span class="icon-box bg-primary/10 text-primary">
+              <Icon icon="heroicons:book-open" class="text-xl" />
+            </span>
+            <div class="min-w-0">
+              <p class="section-label mb-1">练习文章</p>
+              <p class="text-2xl font-semibold tabular-nums text-text-primary">{{ stats?.totalArticlesPracticed || 0 }}</p>
+              <p class="mt-1 text-xs text-text-secondary">累计完成</p>
+            </div>
+          </div>
+
+          <div class="flex min-h-[112px] items-center gap-3 p-5">
+            <span class="icon-box bg-info/10 text-info">
+              <Icon icon="heroicons:pencil-square" class="text-xl" />
+            </span>
+            <div class="min-w-0">
+              <p class="section-label mb-1">答题总数</p>
+              <p class="text-2xl font-semibold tabular-nums text-text-primary">{{ stats?.totalQuestionsAnswered || 0 }}</p>
+              <p class="mt-1 text-xs text-text-secondary">已提交答案</p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="group flex min-h-[112px] w-full items-center gap-3 p-5 text-left transition-colors hover:bg-surface-muted/45"
+            @click="$router.push('/wrong-answers')"
+          >
+            <span class="icon-box bg-danger/10 text-danger transition-colors group-hover:bg-danger group-hover:text-white">
+              <Icon icon="heroicons:exclamation-triangle" class="text-xl" />
+            </span>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2">
+                <p class="section-label">待复习错题</p>
+                <span v-if="(stats?.pendingReviewCount || 0) > 0" class="h-2 w-2 rounded-full bg-danger" />
+              </div>
+              <p class="mt-1 text-2xl font-semibold tabular-nums" :class="pendingClass">{{ stats?.pendingReviewCount || 0 }}</p>
+              <p class="mt-1 text-xs text-text-secondary">进入错题本</p>
+            </div>
+            <Icon icon="heroicons:chevron-right" class="text-lg text-text-secondary/45 transition-colors group-hover:text-danger" />
+          </button>
+        </div>
       </div>
-      <div v-else-if="recentArticles.length === 0" class="text-center py-4 text-text-secondary">
-        暂无最近练习记录
+    </section>
+
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <section class="surface-panel overflow-hidden lg:col-span-2">
+        <div class="flex items-center justify-between gap-3 border-b border-border/50 bg-surface-muted/35 px-5 py-4">
+          <div class="flex items-center gap-2">
+            <h3 class="text-base font-semibold text-text-primary">最近练习</h3>
+            <span v-if="stats?.recentArticles.length" class="rounded-full bg-surface px-2 py-0.5 text-xs text-text-secondary ring-1 ring-border/60">
+              {{ stats?.recentArticles.length }} 篇
+            </span>
+          </div>
+          <BaseButton variant="secondary" size="sm" @click="$router.push('/practice')">
+            练习中心
+            <Icon icon="heroicons:arrow-right" />
+          </BaseButton>
+        </div>
+
+        <div v-if="loading" class="flex justify-center py-14">
+          <div class="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
+        </div>
+
+        <div v-else-if="!stats || stats.recentArticles.length === 0" class="px-6 py-12 text-center">
+          <div class="icon-box mx-auto mb-4 h-12 w-12 bg-primary/10 text-primary"><Icon icon="heroicons:rocket-launch" class="text-2xl" /></div>
+          <p class="mb-2 font-medium text-text-primary">准备开始你的雅思之旅</p>
+          <p class="mb-4 text-sm text-text-secondary">完成第一篇文章后，你的练习记录会出现在这里</p>
+          <BaseButton variant="primary" @click="$router.push('/practice')">去练习中心</BaseButton>
+        </div>
+
+        <div v-else class="divide-y divide-border/45">
+          <div
+            v-for="article in stats.recentArticles"
+            :key="article.articleId"
+            class="group cursor-pointer px-5 py-4 transition-colors hover:bg-surface-muted/45"
+            @click="$router.push(`/reading?articleId=${article.articleId}`)"
+          >
+            <div class="flex items-center gap-4">
+              <div class="relative flex h-12 w-12 shrink-0 items-center justify-center">
+                <svg class="w-12 h-12 -rotate-90" viewBox="0 0 48 48">
+                  <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="3" class="text-border/60" />
+                  <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="3"
+                    :class="articleScoreRingColor(article.score)"
+                    :stroke-dasharray="`${article.score * 1.26} 126`"
+                    stroke-linecap="round" />
+                </svg>
+                <span class="absolute text-xs font-bold" :class="articleScoreColor(article.score)">{{ article.score }}%</span>
+              </div>
+
+              <div class="flex-1 min-w-0">
+                <p class="truncate font-medium text-text-primary transition-colors group-hover:text-primary">{{ article.title }}</p>
+                <div class="mt-1.5 flex flex-wrap items-center gap-3">
+                  <span class="text-xs text-text-secondary">
+                    {{ article.correctCount }}/{{ article.totalQuestions }} 正确
+                  </span>
+                  <span class="rounded-full px-2 py-0.5 text-[11px] font-medium"
+                    :class="article.score >= 80 ? 'bg-success/10 text-success' : article.score >= 60 ? 'bg-primary/10 text-primary' : 'bg-danger/10 text-danger'"
+                  >
+                    {{ article.score >= 80 ? '优秀' : article.score >= 60 ? '良好' : '需加强' }}
+                  </span>
+                </div>
+              </div>
+
+              <Icon icon="heroicons:chevron-right" class="shrink-0 text-xl text-text-secondary/30 transition-colors group-hover:text-primary/50" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="space-y-4">
+        <div class="surface-panel overflow-hidden">
+          <div class="border-b border-border/50 bg-surface-muted/35 px-4 py-3">
+            <p class="section-label">快捷入口</p>
+          </div>
+          <router-link to="/practice" class="group flex items-center gap-3 border-b border-border/30 px-4 py-3 transition-colors last:border-0 hover:bg-surface-muted/45">
+            <span class="icon-box h-9 w-9 bg-primary/10 text-primary transition-all group-hover:bg-primary group-hover:text-white"><Icon icon="heroicons:pencil-square" /></span>
+            <div class="flex-1"><p class="text-sm font-medium text-text-primary">练习中心</p></div>
+            <Icon icon="heroicons:chevron-right" class="text-text-secondary/40 transition-colors group-hover:text-primary" />
+          </router-link>
+          <router-link to="/wrong-answers" class="group flex items-center gap-3 border-b border-border/30 px-4 py-3 transition-colors last:border-0 hover:bg-surface-muted/45">
+            <span class="icon-box h-9 w-9 bg-danger/10 text-danger transition-all group-hover:bg-danger group-hover:text-white"><Icon icon="heroicons:exclamation-triangle" /></span>
+            <div class="flex-1"><p class="text-sm font-medium text-text-primary">错题本</p></div>
+            <span v-if="(stats?.pendingReviewCount || 0) > 0" class="text-[10px] px-1.5 py-0.5 rounded-full bg-danger text-white font-bold mr-1">{{ stats?.pendingReviewCount }}</span>
+            <Icon icon="heroicons:chevron-right" class="text-text-secondary/40 transition-colors group-hover:text-primary" />
+          </router-link>
+          <router-link to="/vocabulary" class="group flex items-center gap-3 border-b border-border/30 px-4 py-3 transition-colors last:border-0 hover:bg-surface-muted/45">
+            <span class="icon-box h-9 w-9 bg-warning/10 text-warning transition-all group-hover:bg-warning group-hover:text-white"><Icon icon="heroicons:bookmark" /></span>
+            <div class="flex-1"><p class="text-sm font-medium text-text-primary">生词本</p></div>
+            <Icon icon="heroicons:chevron-right" class="text-text-secondary/40 transition-colors group-hover:text-primary" />
+          </router-link>
+          <router-link to="/training" class="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-surface-muted/45">
+            <span class="icon-box h-9 w-9 bg-info/10 text-info transition-all group-hover:bg-info group-hover:text-white"><Icon icon="heroicons:bolt" /></span>
+            <div class="flex-1"><p class="text-sm font-medium text-text-primary">专项训练</p></div>
+            <Icon icon="heroicons:chevron-right" class="text-text-secondary/40 transition-colors group-hover:text-primary" />
+          </router-link>
+        </div>
+
+        <div class="surface-panel p-5">
+          <p class="section-label mb-4">答题概况</p>
+          <div class="space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="flex-1">
+                <div class="flex justify-between text-sm mb-1">
+                  <span class="text-text-secondary">正确</span>
+                  <span class="font-semibold text-success">{{ correctCount }}</span>
+                </div>
+                <div class="h-2 w-full overflow-hidden rounded-full bg-surface-muted">
+                  <div class="h-full bg-success rounded-full transition-all duration-700" :style="{ width: (stats?.correctRate || 0) + '%' }" />
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="flex-1">
+                <div class="flex justify-between text-sm mb-1">
+                  <span class="text-text-secondary">错误</span>
+                  <span class="font-semibold text-danger">{{ stats?.wrongAnswersCount || 0 }}</span>
+                </div>
+                <div class="h-2 w-full overflow-hidden rounded-full bg-surface-muted">
+                  <div class="h-full bg-danger rounded-full transition-all duration-700" :style="{ width: (stats?.totalQuestionsAnswered ? (stats?.wrongAnswersCount || 0) * 100 / stats.totalQuestionsAnswered : 0) + '%' }" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mt-5 grid grid-cols-2 gap-3 border-t border-border/40 pt-4 text-center">
+            <div class="rounded-lg bg-surface-muted/60 px-3 py-3">
+              <p class="text-lg font-semibold text-text-primary">{{ stats?.totalArticlesPracticed || 0 }}</p>
+              <p class="text-[11px] text-text-secondary">练习文章</p>
+            </div>
+            <div class="rounded-lg bg-surface-muted/60 px-3 py-3">
+              <p class="text-lg font-semibold text-text-primary">{{ stats?.totalQuestionsAnswered || 0 }}</p>
+              <p class="text-[11px] text-text-secondary">答题总数</p>
+            </div>
+          </div>
+        </div>
       </div>
-      <div v-else class="space-y-2">
-        <router-link
-          v-for="article in recentArticles"
-          :key="String(article.id)"
-          to="/reading"
-          class="block p-3 rounded-lg hover:bg-surface-muted transition-colors border border-border/70"
-        >
-          <p class="font-medium text-text-primary">{{ article.title }}</p>
-          <p class="text-xs text-text-secondary mt-1">{{ article.examType }}</p>
-        </router-link>
-      </div>
-    </BaseCard>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user'
-import { getArticleDetail } from '@/api/article'
 import { apiGetUserStats } from '@/api/stats'
-import { BaseCard } from '@/components'
-import type { Article } from '@/types/article'
+import { BaseButton } from '@/components'
+import { Icon } from '@iconify/vue'
 import type { UserStats } from '@/types/user'
 
 const userStore = useUserStore()
 const loading = ref(false)
-const recentArticlesData = ref<Article[]>([])
-const stats = ref<UserStats>({
-  totalArticlesRead: 0,
-  totalQuestionsAnswered: 0,
-  correctRate: 0
+const stats = ref<UserStats | null>(null)
+const DEFAULT_AVATAR_SRC = '/images/default-avatar.jpg'
+
+const avatarSrc = computed(() => userStore.user?.avatar || DEFAULT_AVATAR_SRC)
+
+function handleAvatarError(event: Event) {
+  const img = event.currentTarget as HTMLImageElement
+  if (img.src.endsWith(DEFAULT_AVATAR_SRC)) return
+  img.src = DEFAULT_AVATAR_SRC
+}
+
+const correctCount = computed(() => {
+  if (!stats.value) return 0
+  return Math.round(stats.value.totalQuestionsAnswered * stats.value.correctRate / 100)
 })
 
-const totalArticles = computed(() => stats.value.totalArticlesRead)
-const totalVocab = computed(() => stats.value.totalQuestionsAnswered)
-const streakDays = computed(() => stats.value.correctRate)
-
-const recentArticles = computed(() => {
-  return recentArticlesData.value.slice(0, 5)
+const correctRateValue = computed(() => {
+  const rate = stats.value?.correctRate || 0
+  return Math.min(Math.max(Math.round(rate), 0), 100)
 })
 
-const fetchStats = async () => {
+const correctRateSummary = computed(() => {
+  const r = correctRateValue.value
+  if (!stats.value?.totalQuestionsAnswered) return '完成一组练习后，这里会显示阅读表现'
+  if (r >= 85) return '表现很稳，可以继续提高速度'
+  if (r >= 70) return '基础不错，适合结合错题复盘'
+  if (r >= 55) return '正在建立手感，建议优先查漏'
+  return '先把错因收拢，节奏会更清晰'
+})
+
+const correctRateClass = computed(() => {
+  const r = correctRateValue.value
+  if (r >= 80) return 'text-success'
+  if (r >= 60) return 'text-primary'
+  return 'text-danger'
+})
+
+const correctRateBarClass = computed(() => {
+  const r = correctRateValue.value
+  if (r >= 80) return 'bg-success'
+  if (r >= 60) return 'bg-primary'
+  return 'bg-danger'
+})
+
+const correctRateRingClass = computed(() => {
+  const r = correctRateValue.value
+  if (r >= 80) return 'text-success'
+  if (r >= 60) return 'text-primary'
+  return 'text-danger'
+})
+
+const pendingClass = computed(() => (stats.value?.pendingReviewCount || 0) > 0 ? 'text-danger' : 'text-text-secondary')
+
+function articleScoreColor(score: number) {
+  if (score >= 80) return 'text-success'
+  if (score >= 60) return 'text-primary'
+  return 'text-danger'
+}
+
+function articleScoreRingColor(score: number) {
+  if (score >= 80) return 'text-success'
+  if (score >= 60) return 'text-primary'
+  return 'text-danger'
+}
+
+async function fetchStats() {
+  loading.value = true
   try {
-    console.log('获取用户统计数据...')
     const { data } = await apiGetUserStats()
-    console.log('统计数据返回:', data)
     if (data.code === 0) {
       stats.value = data.data
     }
   } catch (e) {
     console.error('获取统计数据失败', e)
-  }
-}
-
-const fetchRecentArticles = async () => {
-  const user = userStore.user
-  if (!user?.recentArticles || user.recentArticles.length === 0) {
-    recentArticlesData.value = []
-    return
-  }
-  
-  loading.value = true
-  try {
-    const articles = await Promise.all(
-      user.recentArticles.map(async (articleId) => {
-        try {
-          const { data } = await getArticleDetail(String(articleId))
-          if (data.code === 0) {
-            return data.data
-          }
-          return null
-        } catch {
-          return null
-        }
-      })
-    )
-    recentArticlesData.value = articles.filter((item): item is Article => item !== null)
-  } catch (e) {
-    console.error('获取最近阅读列表失败', e)
-    recentArticlesData.value = []
   } finally {
     loading.value = false
   }
 }
 
-watch(() => userStore.user, (newUser) => {
-  if (newUser?.recentArticles) {
-    fetchRecentArticles()
-  }
-}, { immediate: true })
-
-onMounted(() => {
-  fetchStats()
-})
+onMounted(fetchStats)
 </script>

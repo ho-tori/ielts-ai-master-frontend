@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useThemeStore } from '@/stores/theme'
+import { Icon } from '@iconify/vue'
 
 const router = useRouter()
 const currentStep = ref(0)
-const themeStore = useThemeStore()
 
 // 雅思考试流程数据
 const ieltsSteps = [
@@ -113,7 +112,7 @@ const ieltsSteps = [
   }
 ]
 
-const currentData = computed(() => ieltsSteps[currentStep.value])
+const currentData = computed(() => ieltsSteps[currentStep.value]!)
 
 const prevStep = () => {
   if (currentStep.value > 0) {
@@ -148,15 +147,13 @@ const goBack = () => {
 <template>
   <div class="min-h-screen bg-surface-muted">
     <!-- 顶部导航 -->
-    <div class="sticky top-0 z-10 bg-surface border-b border-border">
+    <div class="sticky top-0 z-10 bg-surface/95 border-b border-border/70 backdrop-blur">
       <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <button
           @click="goBack"
           class="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors"
         >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-          </svg>
+          <Icon icon="heroicons:arrow-left" class="w-5 h-5" />
           返回练习中心
         </button>
         <h1 class="text-xl font-semibold text-text-primary">雅思考试流程指南</h1>
@@ -169,7 +166,7 @@ const goBack = () => {
       <!-- 左右分栏布局 -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <!-- 左侧：图像区域 -->
-        <div class="rounded-xl overflow-hidden shadow-md border border-border">
+        <div class="rounded-lg overflow-hidden shadow-md border border-border">
           <div class="aspect-[4/3]">
             <img
               :src="currentData.image"
@@ -185,9 +182,7 @@ const goBack = () => {
           <div class="mb-4">
             <div class="flex items-center justify-between mb-3">
               <h3 class="text-lg font-semibold text-text-primary flex items-center gap-2">
-                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <Icon icon="heroicons:clock" class="w-5 h-5 text-primary" />
                 考试流程
               </h3>
               <div class="flex items-center gap-2">
@@ -196,18 +191,14 @@ const goBack = () => {
                   :disabled="currentStep === 0"
                   class="w-8 h-8 rounded-full bg-surface flex items-center justify-center border border-border hover:border-primary/50 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                  <svg class="w-4 h-4 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                  </svg>
+                  <Icon icon="heroicons:chevron-left" class="w-4 h-4 text-text-secondary" />
                 </button>
                 <button
                   @click="nextStep"
                   :disabled="currentStep === ieltsSteps.length - 1"
                   class="w-8 h-8 rounded-full bg-surface flex items-center justify-center border border-border hover:border-primary/50 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                  <svg class="w-4 h-4 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
+                  <Icon icon="heroicons:chevron-right" class="w-4 h-4 text-text-secondary" />
                 </button>
               </div>
             </div>
@@ -238,7 +229,7 @@ const goBack = () => {
           </div>
 
           <!-- 中间：详细内容 -->
-          <div class="flex-1 bg-surface rounded-xl p-6 border border-border">
+          <div class="flex-1 bg-surface rounded-lg p-6 border border-border">
             <transition name="fade" mode="out-in">
               <div :key="currentData.id">
                 <!-- 步骤标题 -->
@@ -258,9 +249,7 @@ const goBack = () => {
                   <!-- 考前准备 -->
                   <div v-if="currentData.id === 1" class="rounded-lg p-4 bg-surface-muted border border-border">
                     <h4 class="font-semibold text-text-primary mb-3 flex items-center gap-2">
-                      <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                      </svg>
+                      <Icon icon="heroicons:lock-closed" class="w-4 h-4 text-primary" />
                       考前准备
                     </h4>
                     <ul class="space-y-2 text-sm text-text-secondary">
@@ -286,9 +275,7 @@ const goBack = () => {
                   <!-- 笔试考试 -->
                   <div v-if="currentData.id === 2" class="rounded-lg p-4 bg-surface-muted border border-border">
                     <h4 class="font-semibold text-text-primary mb-3 flex items-center gap-2">
-                      <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
+                      <Icon icon="heroicons:document-text" class="w-4 h-4 text-primary" />
                       笔试考试
                     </h4>
                     <div class="mb-4">
@@ -321,7 +308,7 @@ const goBack = () => {
                         </li>
                         <li class="flex items-start gap-2">
                           <span class="text-primary mt-1">4.</span>
-                          <span>工作人员发放账号密码纸（草稿纸）⚠️ 正式开考前一个字不能写</span>
+                          <span>工作人员发放账号密码纸（草稿纸），注意：正式开考前一个字不能写</span>
                         </li>
                       </ul>
                     </div>
@@ -330,9 +317,7 @@ const goBack = () => {
                   <!-- 听力考试 -->
                   <div v-if="currentData.id === 3" class="rounded-lg p-4 bg-surface-muted border border-border">
                     <h4 class="font-semibold text-text-primary mb-3 flex items-center gap-2">
-                      <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                      </svg>
+                      <Icon icon="heroicons:microphone" class="w-4 h-4 text-primary" />
                       笔试听力
                     </h4>
                     <ul class="space-y-2 text-sm text-text-secondary">
@@ -368,9 +353,7 @@ const goBack = () => {
                   <!-- 阅读考试 -->
                   <div v-if="currentData.id === 4" class="rounded-lg p-4 bg-surface-muted border border-border">
                     <h4 class="font-semibold text-text-primary mb-3 flex items-center gap-2">
-                      <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                      </svg>
+                      <Icon icon="heroicons:book-open" class="w-4 h-4 text-primary" />
                       笔试阅读
                     </h4>
                     <ul class="space-y-2 text-sm text-text-secondary">
@@ -396,9 +379,7 @@ const goBack = () => {
                   <!-- 写作考试 -->
                   <div v-if="currentData.id === 5" class="rounded-lg p-4 bg-surface-muted border border-border">
                     <h4 class="font-semibold text-text-primary mb-3 flex items-center gap-2">
-                      <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                      </svg>
+                      <Icon icon="heroicons:pencil-square" class="w-4 h-4 text-primary" />
                       笔试作文
                     </h4>
                     <ul class="space-y-2 text-sm text-text-secondary">
@@ -424,9 +405,7 @@ const goBack = () => {
                   <!-- 口语考试 -->
                   <div v-if="currentData.id === 6" class="rounded-lg p-4 bg-surface-muted border border-border">
                     <h4 class="font-semibold text-text-primary mb-3 flex items-center gap-2">
-                      <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                      </svg>
+                      <Icon icon="heroicons:microphone" class="w-4 h-4 text-primary" />
                       口语篇
                     </h4>
                     <div class="mb-4">
@@ -463,9 +442,7 @@ const goBack = () => {
                   <!-- 其他注意事项 -->
                   <div v-if="currentData.id === 7" class="rounded-lg p-4 bg-surface-muted border border-border">
                     <h4 class="font-semibold text-text-primary mb-3 flex items-center gap-2">
-                      <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
+                      <Icon icon="heroicons:information-circle" class="w-4 h-4 text-primary" />
                       其他注意事项
                     </h4>
                     <div>
@@ -473,7 +450,7 @@ const goBack = () => {
                       <ul class="space-y-2 text-sm text-text-secondary">
                         <li class="flex items-start gap-2">
                           <span class="text-primary mt-1">1.</span>
-                          <span>仅仅只有写作的时间可以申请上厕所（注意：⚠️但并不单独计算—会占用考试时间）</span>
+                          <span>仅仅只有写作的时间可以申请上厕所（注意：会占用考试时间）</span>
                         </li>
                         <li class="flex items-start gap-2">
                           <span class="text-primary mt-1">2.</span>
@@ -507,9 +484,7 @@ const goBack = () => {
                   <!-- 成绩查询 -->
                   <div v-if="currentData.id === 8" class="rounded-lg p-4 bg-surface-muted border border-border">
                     <h4 class="font-semibold text-text-primary mb-3 flex items-center gap-2">
-                      <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
+                      <Icon icon="heroicons:check-circle" class="w-4 h-4 text-primary" />
                       成绩查询
                     </h4>
                     <ul class="space-y-2 text-sm text-text-secondary">

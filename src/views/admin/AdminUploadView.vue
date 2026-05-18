@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { uploadArticle, type UploadArticlePayload } from '@/api/article'
-import { BaseButton, BaseCard, BaseInput, BaseSelect, BaseTextarea } from '@/components'
+import { BaseButton, BaseCard, BaseInput, BaseSelect, BaseTextarea, PageHeader } from '@/components'
 import AdminQuestionItem from './components/AdminQuestionItem.vue'
 
 type InputMode = 'form' | 'json'
@@ -274,17 +274,19 @@ async function handleSubmit() {
 </script>
 
 <template>
+  <div class="app-page">
+    <PageHeader
+      title="管理员文章上传"
+      description="录入文章、段落和题目数据，支持表单与 JSON 两种工作流。"
+    />
   <BaseCard>
     <template #header>
-      <div>
-        <h2 class="text-2xl font-bold text-text-primary mb-1">管理员文章上传</h2>
-        <p class="text-text-secondary text-sm">按后端 UploadArticlePayload 结构录入文章数据。</p>
-      </div>
+      <h2 class="font-bold text-text-primary">文章数据</h2>
     </template>
 
     <form class="space-y-6" @submit.prevent="handleSubmit">
       <div class="flex flex-wrap items-center gap-2">
-        <div class="flex items-center gap-2 rounded-xl bg-surface-muted p-1 w-fit">
+        <div class="segmented-control w-fit">
           <BaseButton
             type="button"
             size="sm"
@@ -375,7 +377,7 @@ async function handleSubmit() {
         />
       </template>
 
-      <div class="rounded-xl border border-border p-4 bg-surface-muted">
+      <div class="rounded-lg border border-border p-4 bg-surface-muted">
         <p v-if="successMessage" class="text-success text-sm">{{ successMessage }}</p>
         <p v-if="errorMessage" class="text-danger text-sm">{{ errorMessage }}</p>
         <p v-if="!successMessage && !errorMessage" class="text-text-secondary text-sm">提交后会进入后端文章库，可在阅读模块加载。</p>
@@ -387,4 +389,5 @@ async function handleSubmit() {
       </div>
     </form>
   </BaseCard>
+  </div>
 </template>

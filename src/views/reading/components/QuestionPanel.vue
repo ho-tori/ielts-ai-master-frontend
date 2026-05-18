@@ -14,11 +14,11 @@
         :id="`question-item-${q.id}`"
         :key="q.id"
         :class="[
-          'pb-4 border-b border-slate-100 last:border-0 scroll-mt-24 transition-all'
+          'pb-4 border-b border-border/70 last:border-0 scroll-mt-24 transition-all'
         ]"
       >
-        <p class="font-medium text-slate-800 mb-3">
-          <span class="text-indigo-600">{{ idx + 1 }}.</span> {{ q.stem }}
+        <p class="reading-answer-english font-medium text-text-primary mb-3">
+          <span class="text-primary">{{ idx + 1 }}.</span> {{ q.stem }}
         </p>
         <div class="space-y-2">
           <BaseButton
@@ -28,10 +28,11 @@
             :variant="getButtonVariant(q.id, opt, q.correctAnswer)"
             block
             :disabled="showResults"
+            class="reading-answer-english"
             @click="selectAnswer(q.id, opt)"
           >
             {{ opt }}
-            <span v-if="showResults && opt === q.correctAnswer" class="ml-2">✓</span>
+            <Icon v-if="showResults && opt === q.correctAnswer" icon="heroicons:check" class="ml-2" />
           </BaseButton>
           <BaseButton
             v-else-if="q.questionTypeCode === 'match'"
@@ -40,10 +41,11 @@
             :variant="getButtonVariant(q.id, opt.label, q.correctAnswer)"
             block
             :disabled="showResults"
+            class="reading-answer-english"
             @click="selectAnswer(q.id, opt.label)"
           >
             {{ opt.label }}. {{ opt.content }}
-            <span v-if="showResults && opt.label === q.correctAnswer" class="ml-2">✓</span>
+            <Icon v-if="showResults && opt.label === q.correctAnswer" icon="heroicons:check" class="ml-2" />
           </BaseButton>
           <BaseButton
             v-else
@@ -52,13 +54,14 @@
             :variant="getButtonVariant(q.id, opt.label, q.correctAnswer)"
             block
             :disabled="showResults"
+            class="reading-answer-english"
             @click="selectAnswer(q.id, opt.label)"
           >
             {{ opt.label }}. {{ opt.content }}
-            <span v-if="showResults && opt.label === q.correctAnswer" class="ml-2">✓</span>
+            <Icon v-if="showResults && opt.label === q.correctAnswer" icon="heroicons:check" class="ml-2" />
           </BaseButton>
         </div>
-        <div v-if="showResults && q.analysis" class="mt-2 p-2 bg-slate-50 text-sm text-slate-600">
+        <div v-if="showResults && q.analysis" class="mt-2 p-3 rounded-lg bg-surface-muted text-sm text-text-secondary">
           {{ q.analysis }}
         </div>
       </div>
@@ -67,7 +70,7 @@
       <div v-if="showResults" class="space-y-2">
         <div class="p-3 text-center" :class="scoreBgClass">
           <p class="text-lg font-bold" :class="scoreClass">
-            {{ score >= 60 ? '🎉 恭喜通过！' : '💪 继续加油！' }}
+            {{ score >= 60 ? '恭喜通过！' : '继续加油！' }}
           </p>
           <p class="text-sm text-text-secondary">正确率: {{ score }}%</p>
         </div>
@@ -95,6 +98,7 @@
 import { ref, computed, watch, nextTick } from 'vue'
 import type { Question, QuestionOption } from '../../../types/article'
 import { BaseButton } from '@/components'
+import { Icon } from '@iconify/vue'
 
 const props = defineProps<{
   questions: Question[]
@@ -180,7 +184,7 @@ const score = computed(() => {
   if (!props.showResults) return 0
   let correct = 0
   props.questions.forEach(q => {
-    if (selectedAnswers.value[q.id] === q.correctAnswer) {
+    if (selectedAnswers.value[q.id] === normalizeAnswer(q.correctAnswer)) {
       correct++
     }
   })
@@ -199,15 +203,34 @@ const scoreBgClass = computed(() => {
   return 'bg-danger/10'
 })
 
+function normalizeAnswer(raw: string | undefined): string {
+  if (!raw) return ''
+  // 去掉JSON引号：数据库JSON列可能存储 "A" 而非 A
+  try {
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed)) return parsed.join(',')
+    return String(parsed)
+  } catch {
+    return raw
+  }
+}
+
 function getButtonVariant(questionId: number, option: string, correctAnswer?: string): ButtonVariant {
   const userAnswer = selectedAnswers.value[questionId]
-  
+  const normalizedCorrect = normalizeAnswer(correctAnswer)
+
   if (props.showResults) {
-    if (option === correctAnswer) return 'success'
-    if (option === userAnswer && option !== correctAnswer) return 'danger'
+    if (option === normalizedCorrect) return 'success'
+    if (option === userAnswer && option !== normalizedCorrect) return 'danger'
     return 'secondary'
   }
-  
+
   return option === userAnswer ? 'tertiary' : 'secondary'
 }
 </script>
+
+<style scoped>
+.reading-answer-english {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+</style>

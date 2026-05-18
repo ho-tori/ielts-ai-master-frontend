@@ -39,7 +39,7 @@ export interface UploadArticlePayload {
   }>
 }
 
-export function getArticleList(params?: { examType?: string; difficulty?: string; page?: number }) {
+export function getArticleList(params?: { examType?: string; difficulty?: string; page?: number; size?: number }) {
   if (mockAuthEnabled) {
     const filtered = mockArticles.filter((item) => {
       const examTypeOk = !params?.examType || item.examType === params.examType
@@ -94,6 +94,10 @@ export function submitAnswer(articleId: string, data: SubmitAnswerRequest) {
     `/articles/${articleId}/submit`,
     data
   )
+}
+
+export function apiGetProgress() {
+  return request.get<ApiResponse<Record<number, any>>>('/articles/progress')
 }
 
 export function uploadArticle(payload: UploadArticlePayload) {

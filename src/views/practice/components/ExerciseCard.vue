@@ -1,153 +1,85 @@
 <template>
-  <div class="group p-5 bg-surface border border-border/70 rounded-2xl hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10 transition-all cursor-pointer">
-    <div class="flex items-start justify-between">
-      <!-- 左侧内容 -->
-      <div class="flex-1">
-        <!-- 标签区域 -->
-        <div class="flex items-center space-x-3 mb-3">
-          <span :class="['px-2 py-0.5 text-[10px] font-black rounded uppercase', getCategoryClass(exercise.category)]">
-            {{ getCategoryLabel(exercise.category) }}
+  <div class="interactive-row group flex cursor-pointer flex-col overflow-hidden p-0" @click="$emit('start', article.id)">
+    <div class="flex flex-1 flex-col gap-4 p-5">
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="rounded-md bg-primary/10 px-2 py-1 text-[11px] font-semibold text-primary">
+            {{ article.examType }}
           </span>
-          <span class="flex items-center text-[11px] font-bold" :class="getDifficultyColor(exercise.difficulty)">
-            <Icon :icon="getDifficultyIcon(exercise.difficulty)" class="mr-1" /> 
-            {{ getDifficultyLabel(exercise.difficulty) }}
+          <span class="flex items-center rounded-md bg-surface-muted px-2 py-1 text-[11px] font-semibold" :class="getDifficultyColor(article.difficulty)">
+            {{ getDifficultyLabel(article.difficulty) }}
+          </span>
+          <span
+            v-for="topic in (article.topics || [])"
+            :key="topic.id"
+            class="rounded-md bg-surface-muted px-2 py-1 text-[11px] text-text-secondary"
+          >
+            {{ topic.name }}
           </span>
         </div>
 
-        <!-- 标题 -->
-        <h4 class="text-lg font-bold text-text-primary group-hover:text-primary transition-colors line-clamp-2 mb-2">
-          {{ exercise.title }}
+        <h4 class="line-clamp-2 min-h-[3.25rem] text-lg font-semibold leading-7 text-text-primary transition-colors group-hover:text-primary">
+          {{ article.title }}
         </h4>
 
-        <!-- 描述 -->
-        <p class="text-xs text-text-secondary line-clamp-2 mb-3">
-          {{ exercise.description }}
-        </p>
-
-        <!-- 统计信息 -->
-        <div class="flex items-center space-x-6 text-xs text-text-secondary/70">
-          <span class="flex items-center">
-            <Icon icon="heroicons:document-text" class="mr-1.5" /> 
-            {{ exercise.wordCount }} 词
+        <div class="mt-auto flex flex-wrap items-center gap-4 text-xs text-text-secondary">
+          <span class="inline-flex items-center gap-1">
+            <Icon icon="heroicons:list-bullet" />{{ article.questions?.length || 0 }} 题
           </span>
-          <span class="flex items-center">
-            <Icon icon="heroicons:clock" class="mr-1.5" /> 
-            {{ exercise.estimatedTime }}
+          <span v-if="article.paragraphs?.length" class="inline-flex items-center gap-1">
+            <Icon icon="heroicons:document-text" />{{ article.paragraphs.length }} 段落
           </span>
-          <div class="flex items-center gap-2">
-            <span 
-              v-for="tag in exercise.tags.slice(0, 2)"
-              :key="tag"
-              class="px-2 py-0.5 bg-surface-muted text-text-secondary text-[10px] rounded"
-            >
-              {{ tag }}
-            </span>
-          </div>
         </div>
-      </div>
+    </div>
 
-      <!-- 右侧操作区 -->
-      <div class="flex flex-col items-end space-y-3 ml-4">
-        <span 
+    <div class="flex flex-col gap-3 border-t border-border/45 bg-surface-muted/35 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <div class="min-w-0 flex-1">
+        <span
           :class="[
-            'px-3 py-1 text-[10px] font-bold rounded-full',
-            exercise.completed 
-              ? 'bg-success/15 text-success' 
-              : 'bg-surface-muted text-text-secondary'
+            'inline-flex rounded-full px-2.5 py-1 text-xs font-medium',
+            progress?.completed
+              ? 'bg-success/15 text-success'
+              : progress
+                ? 'bg-primary/10 text-primary'
+                : 'bg-surface-muted text-text-secondary'
           ]"
         >
-          {{ exercise.completed ? '完成过' : '未开始' }}
+          {{ progress?.completed ? '已完成' : progress ? `已答${progress.answeredQuestions}/${progress.totalQuestions}题` : '未开始' }}
         </span>
-        <BaseButton 
-          @click="$emit('start', exercise.id)"
-          variant="primary" 
-          size="sm"
-        >
-          开始练习
-        </BaseButton>
+        <div v-if="progress" class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-surface">
+          <div
+            class="h-full rounded-full bg-primary transition-all duration-500"
+            :style="{ width: Math.min(100, Math.round(progress.answeredQuestions * 100 / Math.max(progress.totalQuestions, 1))) + '%' }"
+          />
+        </div>
       </div>
+      <BaseButton variant="primary" size="sm">
+        {{ progress ? '继续练习' : '开始练习' }}
+      </BaseButton>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { Icon } from '@iconify/vue'
 import { BaseButton } from '@/components'
-import type { Exercise } from '../../../types/article'
+import { Icon } from '@iconify/vue'
+import type { ArticleListItem } from '@/types/article'
 
 defineProps<{
-  exercise: Exercise
+  article: ArticleListItem
+  progress?: { totalQuestions: number; answeredQuestions: number; correctAnswers: number; completed: boolean } | null
 }>()
 
-defineEmits<{
-  (e: 'start', id: number): void
-}>()
+defineEmits<{ (e: 'start', id: number): void }>()
 
-const getDifficultyLabel = (difficulty: string) => {
-  switch(difficulty) {
-    case 'easy':
-      return '基础'
-    case 'medium':
-      return '中等'
-    case 'hard':
-      return '挑战'
-    default:
-      return '未知'
-  }
+function getDifficultyLabel(difficulty: string) {
+  const map: Record<string, string> = { '简单': '简单', 'easy': '简单', '中等': '中等', 'medium': '中等', '困难': '困难', 'hard': '困难' }
+  return map[difficulty] || difficulty || '中等'
 }
 
-const getDifficultyIcon = (difficulty: string) => {
-  switch(difficulty) {
-    case 'easy':
-      return 'heroicons:academic-cap-solid'
-    case 'medium':
-      return 'heroicons:star-solid'
-    case 'hard':
-      return 'heroicons:fire-solid'
-    default:
-      return 'heroicons:star-solid'
-  }
-}
-
-const getDifficultyColor = (difficulty: string) => {
-  switch(difficulty) {
-    case 'easy':
-      return 'text-success'
-    case 'medium':
-      return 'text-primary'
-    case 'hard':
-      return 'text-danger'
-    default:
-      return 'text-text-secondary'
-  }
-}
-
-const getCategoryLabel = (category: string) => {
-  switch(category) {
-    case 'news':
-      return '新闻'
-    case 'academic':
-      return '学术'
-    case 'fiction':
-      return '文学'
-    default:
-      return '其他'
-  }
-}
-
-const getCategoryClass = (category: string) => {
-  switch(category) {
-    case 'news':
-      return 'bg-surface-muted text-text-secondary'
-    case 'academic':
-      return 'bg-primary/10 text-primary'
-    case 'fiction':
-      return 'bg-surface-muted text-text-secondary'
-    default:
-      return 'bg-surface-muted text-text-secondary'
-  }
+function getDifficultyColor(difficulty: string) {
+  if (difficulty === '简单' || difficulty === 'easy') return 'text-success'
+  if (difficulty === '中等' || difficulty === 'medium') return 'text-primary'
+  if (difficulty === '困难' || difficulty === 'hard') return 'text-danger'
+  return 'text-text-secondary'
 }
 </script>
-
-<style scoped>
-</style>

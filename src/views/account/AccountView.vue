@@ -1,5 +1,6 @@
 <template>
-  <div class="space-y-6">
+  <div class="app-page">
+    <PageHeader title="个人中心" description="管理账号资料、学习数据和安全设置。" />
     <BaseCard>
       <template #header>
         <div class="flex items-center justify-between">
@@ -8,50 +9,53 @@
         </div>
       </template>
       <div class="flex flex-col items-center">
-        <div class="w-24 h-24 rounded-full bg-primary/10 border-4 border-primary/20 flex items-center justify-center text-primary font-bold text-2xl">
-          {{ initials }}
-        </div>
-        <h3 class="mt-3 text-xl font-bold text-slate-800">{{ user?.nickname || user?.username || '用户' }}</h3>
-        <p class="text-slate-400 text-sm">{{ user?.email || '未设置邮箱' }}</p>
+        <img
+          :src="avatarSrc"
+          alt="用户头像"
+          class="h-24 w-24 rounded-lg border border-primary/20 bg-primary/10 object-cover shadow-sm"
+          @error="handleAvatarError"
+        >
+        <h3 class="mt-3 text-xl font-bold text-text-primary">{{ user?.nickname || user?.username || '用户' }}</h3>
+        <p class="text-text-secondary text-sm">{{ user?.email || '未设置邮箱' }}</p>
       </div>
     </BaseCard>
 
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center">
-        <span class="text-indigo-600 font-bold text-xl">{{ stats.totalArticlesRead }}</span>
-        <span class="text-slate-400 text-[11px] uppercase tracking-wider">已读文章</span>
+      <div class="metric-card flex flex-col items-center">
+        <span class="text-primary font-bold text-xl">{{ stats.totalArticlesPracticed }}</span>
+        <span class="text-text-secondary text-[11px] uppercase">练习文章</span>
       </div>
-      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center">
-        <span class="text-indigo-600 font-bold text-xl">{{ stats.totalQuestionsAnswered }}</span>
-        <span class="text-slate-400 text-[11px] uppercase tracking-wider">答题数</span>
+      <div class="metric-card flex flex-col items-center">
+        <span class="text-primary font-bold text-xl">{{ stats.totalQuestionsAnswered }}</span>
+        <span class="text-text-secondary text-[11px] uppercase">答题数</span>
       </div>
-      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center">
-        <span class="text-indigo-600 font-bold text-xl">{{ stats.correctRate }}%</span>
-        <span class="text-slate-400 text-[11px] uppercase tracking-wider">正确率</span>
+      <div class="metric-card flex flex-col items-center">
+        <span class="text-primary font-bold text-xl">{{ stats.correctRate }}%</span>
+        <span class="text-text-secondary text-[11px] uppercase">正确率</span>
       </div>
     </div>
     <BaseCard>
       <div class="divide-y divide-border/70">
         <button class="w-full flex items-center justify-between p-4 hover:bg-surface-muted transition-colors" @click="showEditProfile = true">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <Icon icon="solar:user-circle-linear" class="text-primary text-xl" />
             </div>
             <div class="text-left">
-              <p class="text-sm font-semibold text-slate-800">编辑资料</p>
-              <p class="text-[11px] text-slate-400">修改昵称、邮箱、头像</p>
+              <p class="text-sm font-semibold text-text-primary">编辑资料</p>
+              <p class="text-[11px] text-text-secondary">修改昵称、邮箱、头像</p>
             </div>
           </div>
           <Icon icon="solar:alt-arrow-right-linear" class="text-text-secondary/50" />
         </button>
-        <button class="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors" @click="showAccountSecurity = true">
+        <button class="w-full flex items-center justify-between p-4 hover:bg-surface-muted transition-colors" @click="showAccountSecurity = true">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <Icon icon="solar:shield-keyhole-linear" class="text-primary text-xl" />
             </div>
             <div class="text-left">
-              <p class="text-sm font-semibold text-slate-800">账户安全</p>
-              <p class="text-[11px] text-slate-400">修改密码</p>
+              <p class="text-sm font-semibold text-text-primary">账户安全</p>
+              <p class="text-[11px] text-text-secondary">修改密码</p>
             </div>
           </div>
           <Icon icon="solar:alt-arrow-right-linear" class="text-text-secondary/50" />
@@ -82,7 +86,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useUserStore } from '../../stores/user'
 import { useRouter } from 'vue-router'
-import { BaseCard, BaseButton } from '@/components'
+import { BaseCard, BaseButton, PageHeader } from '@/components'
 import EditProfileDialog from './components/EditProfileDialog.vue'
 import AccountSecurityDialog from './components/AccountSecurityDialog.vue'
 import { apiUpdateProfile, apiUpdateSecurity } from '@/api/user'
@@ -96,14 +100,25 @@ const user = computed(() => userStore.user)
 
 const showEditProfile = ref(false)
 const showAccountSecurity = ref(false)
+const DEFAULT_AVATAR_SRC = '/images/default-avatar.jpg'
+
+const avatarSrc = computed(() => user.value?.avatar || DEFAULT_AVATAR_SRC)
+
+function handleAvatarError(event: Event) {
+  const img = event.currentTarget as HTMLImageElement
+  if (img.src.endsWith(DEFAULT_AVATAR_SRC)) return
+  img.src = DEFAULT_AVATAR_SRC
+}
 
 const stats = ref<UserStats>({
-  totalArticlesRead: 0,
+  totalArticlesPracticed: 0,
   totalQuestionsAnswered: 0,
-  correctRate: 0
+  correctRate: 0,
+  wrongAnswersCount: 0,
+  pendingReviewCount: 0,
+  lastPracticeTime: null,
+  recentArticles: []
 })
-
-const initials = computed(() => (user.value?.nickname || user.value?.username || '用户').slice(0, 1).toUpperCase())
 
 async function handleSaveProfile(data: { nickname: string; email: string }) {
   try {

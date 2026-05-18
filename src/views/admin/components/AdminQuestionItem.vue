@@ -80,7 +80,7 @@ function updateOption(index: number, value: string) {
 </script>
 
 <template>
-  <div class="p-4 rounded-xl border border-border bg-surface-muted/60 space-y-3">
+  <div class="p-4 rounded-lg border border-border bg-surface-muted/60 space-y-3">
     <div class="flex items-center justify-between">
       <p class="text-sm font-semibold text-text-secondary">题目 {{ index + 1 }}</p>
       <BaseButton variant="danger" size="sm" :disabled="!canRemove" @click="emit('remove')">删除</BaseButton>

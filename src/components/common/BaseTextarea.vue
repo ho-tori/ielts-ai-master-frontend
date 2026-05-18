@@ -37,7 +37,7 @@ defineEmits<{
 
 const textareaClass = computed(
   () =>
-    `w-full px-4 py-3 rounded-lg border border-border bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 text-text-primary placeholder:text-text-secondary/70 transition-all outline-none ${props.minHeightClass}`
+    `w-full rounded-lg border border-border/80 bg-surface-elevated px-4 py-3 text-text-primary shadow-[0_1px_2px_rgb(15_23_42_/_0.03)] outline-none transition-all placeholder:text-text-secondary/55 hover:border-primary/30 focus:border-primary focus:ring-2 focus:ring-primary/20 ${props.minHeightClass}`
 )
 </script>
 

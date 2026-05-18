@@ -24,10 +24,22 @@ export interface LoginResponse {
 	user: User
 }
 
+export interface RecentArticleStats {
+  articleId: number
+  title: string
+  totalQuestions: number
+  correctCount: number
+  score: number
+}
+
 export interface UserStats {
-	totalArticlesRead: number
-	totalQuestionsAnswered: number
-	correctRate: number
+  totalArticlesPracticed: number
+  totalQuestionsAnswered: number
+  correctRate: number
+  wrongAnswersCount: number
+  pendingReviewCount: number
+  lastPracticeTime: string | null
+  recentArticles: RecentArticleStats[]
 }
 
 export interface UserProfile extends User {

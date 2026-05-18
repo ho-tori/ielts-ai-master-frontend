@@ -46,6 +46,36 @@ const router = createRouter({
           name: 'AdminUpload',
           component: () => import('../views/admin/AdminUploadView.vue'),
           meta: { requiresAuth: true }
+        },
+        {
+          path: 'wrong-answers',
+          name: 'WrongAnswers',
+          component: () => import('../views/wrongAnswers/WrongAnswersView.vue'),
+          meta: { requiresAuth: true }
+        },
+        {
+          path: 'wrong-answers/:id',
+          name: 'AnalysisDetail',
+          component: () => import('../views/wrongAnswers/AnalysisDetailView.vue'),
+          meta: { requiresAuth: true }
+        },
+        {
+          path: 'vocabulary',
+          name: 'Vocabulary',
+          component: () => import('../views/vocabulary/VocabularyView.vue'),
+          meta: { requiresAuth: true }
+        },
+        {
+          path: 'training',
+          name: 'Training',
+          component: () => import('../views/training/TrainingView.vue'),
+          meta: { requiresAuth: true }
+        },
+        {
+          path: 'training/:id',
+          name: 'TrainingSession',
+          component: () => import('../views/training/TrainingSessionView.vue'),
+          meta: { requiresAuth: true }
         }
       ]
     },

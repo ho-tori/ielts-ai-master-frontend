@@ -14,7 +14,7 @@ const goBack = () => {
 </script>
 
 <template>
-  <div class="flex items-center justify-center min-h-screen bg-gradient-to-br from-surface-muted to-surface">
+  <div class="flex items-center justify-center min-h-screen bg-surface-muted">
     <div class="text-center max-w-md px-6">
       <!-- 404 大图标 -->
       <div class="mb-6">
@@ -50,12 +50,6 @@ const goBack = () => {
         </BaseButton>
       </div>
 
-      <!-- 装饰元素 -->
-      <div class="mt-12 flex justify-center gap-2">
-        <div class="w-2 h-2 rounded-full bg-primary/40"></div>
-        <div class="w-2 h-2 rounded-full bg-primary/30"></div>
-        <div class="w-2 h-2 rounded-full bg-primary/20"></div>
-      </div>
     </div>
   </div>
 </template>
