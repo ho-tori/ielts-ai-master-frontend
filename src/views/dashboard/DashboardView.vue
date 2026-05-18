@@ -36,89 +36,122 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <div class="metric-card relative overflow-hidden">
-        <div class="absolute inset-x-0 top-0 h-1 bg-primary" />
-        <div class="flex h-full flex-col justify-between gap-5">
-          <div class="flex items-center justify-between gap-3">
-            <p class="section-label">练习文章</p>
-            <div class="icon-box bg-primary/10 text-primary"><Icon icon="heroicons:book-open" class="text-xl" /></div>
-          </div>
-          <div>
-            <p class="text-3xl font-semibold text-text-primary">{{ stats?.totalArticlesPracticed || 0 }}</p>
-            <p class="mt-1 text-xs text-text-secondary">累计完成文章</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="metric-card relative overflow-hidden">
-        <div class="absolute inset-x-0 top-0 h-1 bg-info" />
-        <div class="flex h-full flex-col justify-between gap-5">
-          <div class="flex items-center justify-between gap-3">
-            <p class="section-label">答题总数</p>
-            <div class="icon-box bg-info/10 text-info"><Icon icon="heroicons:pencil-square" class="text-xl" /></div>
-          </div>
-          <div>
-            <p class="text-3xl font-semibold text-text-primary">{{ stats?.totalQuestionsAnswered || 0 }}</p>
-            <p class="mt-1 text-xs text-text-secondary">已提交答案</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="metric-card relative overflow-hidden">
-        <div class="absolute inset-x-0 top-0 h-1" :class="correctRateBarClass" />
-        <div class="flex h-full items-center justify-between gap-4">
-          <div>
-            <p class="section-label mb-4">正确率</p>
-            <div class="flex items-baseline gap-1">
-              <p class="text-3xl font-semibold" :class="correctRateClass">{{ stats?.correctRate || 0 }}</p>
-              <span class="text-sm text-text-secondary">%</span>
+    <section class="surface-panel overflow-hidden">
+      <div class="grid lg:grid-cols-[minmax(0,1.22fr)_minmax(320px,0.78fr)]">
+        <div class="border-b border-border/50 bg-surface-muted/30 p-5 sm:p-6 lg:border-b-0 lg:border-r">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div class="min-w-0">
+              <p class="section-label mb-2">学习进度</p>
+              <h3 class="text-xl font-semibold leading-tight text-text-primary">阅读表现稳定度</h3>
+              <p class="mt-1 max-w-2xl text-sm leading-6 text-text-secondary">
+                用正确率和累计练习量判断当前节奏，优先处理还没复盘的错题。
+              </p>
             </div>
-            <p class="mt-1 text-xs text-text-secondary">阅读题表现</p>
+            <BaseButton variant="secondary" size="sm" @click="$router.push('/wrong-answers')">
+              查看错题
+              <Icon icon="heroicons:arrow-right" />
+            </BaseButton>
           </div>
-          <div class="relative flex h-14 w-14 shrink-0 items-center justify-center">
-            <svg class="h-14 w-14 -rotate-90" viewBox="0 0 40 40">
-              <circle cx="20" cy="20" r="17" fill="none" stroke="currentColor" stroke-width="3" class="text-border/60" />
-              <circle
-                cx="20"
-                cy="20"
-                r="17"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="3"
-                :class="correctRateRingClass"
-                :stroke-dasharray="`${(stats?.correctRate || 0) * 1.07} 107`"
-                stroke-linecap="round"
-              />
-            </svg>
+
+          <div class="mt-6 flex flex-col gap-6 md:flex-row md:items-end">
+            <div class="flex items-center gap-4">
+              <div class="relative flex h-28 w-28 shrink-0 items-center justify-center">
+                <svg class="h-28 w-28 -rotate-90" viewBox="0 0 120 120" aria-hidden="true">
+                  <circle cx="60" cy="60" r="48" fill="none" stroke="currentColor" stroke-width="10" class="text-border/55" />
+                  <circle
+                    cx="60"
+                    cy="60"
+                    r="48"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="10"
+                    :class="correctRateRingClass"
+                    :stroke-dasharray="`${correctRateValue * 3.02} 302`"
+                    stroke-linecap="round"
+                  />
+                </svg>
+                <div class="absolute text-center">
+                  <div class="flex items-baseline justify-center gap-0.5">
+                    <span class="text-3xl font-semibold tabular-nums" :class="correctRateClass">{{ correctRateValue }}</span>
+                    <span class="text-sm text-text-secondary">%</span>
+                  </div>
+                  <p class="mt-0.5 text-[11px] font-medium text-text-secondary">正确率</p>
+                </div>
+              </div>
+
+              <div class="min-w-0">
+                <p class="text-sm font-semibold text-text-primary">{{ correctRateSummary }}</p>
+                <p class="mt-2 text-sm leading-6 text-text-secondary">
+                  已答 {{ stats?.totalQuestionsAnswered || 0 }} 题，其中 {{ correctCount }} 题正确。
+                </p>
+              </div>
+            </div>
+
+            <div class="min-w-0 flex-1">
+              <div class="mb-2 flex items-center justify-between gap-3 text-xs font-medium text-text-secondary">
+                <span>答题表现</span>
+                <span class="tabular-nums">{{ correctRateValue }}/100</span>
+              </div>
+              <div class="h-3 w-full overflow-hidden rounded-full bg-surface shadow-[inset_0_1px_2px_rgb(15_23_42_/_0.08)]">
+                <div
+                  class="h-full rounded-full transition-all duration-700"
+                  :class="correctRateBarClass"
+                  :style="{ width: `${correctRateValue}%` }"
+                />
+              </div>
+              <div class="mt-4 flex flex-wrap gap-2 text-xs text-text-secondary">
+                <span class="rounded-full border border-border/60 bg-surface px-3 py-1">文章 {{ stats?.totalArticlesPracticed || 0 }} 篇</span>
+                <span class="rounded-full border border-border/60 bg-surface px-3 py-1">错题 {{ stats?.wrongAnswersCount || 0 }} 题</span>
+                <span class="rounded-full border border-border/60 bg-surface px-3 py-1">待复习 {{ stats?.pendingReviewCount || 0 }} 题</span>
+              </div>
+            </div>
           </div>
+        </div>
+
+        <div class="grid divide-y divide-border/45 sm:grid-cols-3 sm:divide-x sm:divide-y-0 lg:grid-cols-1 lg:divide-x-0 lg:divide-y">
+          <div class="flex min-h-[112px] items-center gap-3 p-5">
+            <span class="icon-box bg-primary/10 text-primary">
+              <Icon icon="heroicons:book-open" class="text-xl" />
+            </span>
+            <div class="min-w-0">
+              <p class="section-label mb-1">练习文章</p>
+              <p class="text-2xl font-semibold tabular-nums text-text-primary">{{ stats?.totalArticlesPracticed || 0 }}</p>
+              <p class="mt-1 text-xs text-text-secondary">累计完成</p>
+            </div>
+          </div>
+
+          <div class="flex min-h-[112px] items-center gap-3 p-5">
+            <span class="icon-box bg-info/10 text-info">
+              <Icon icon="heroicons:pencil-square" class="text-xl" />
+            </span>
+            <div class="min-w-0">
+              <p class="section-label mb-1">答题总数</p>
+              <p class="text-2xl font-semibold tabular-nums text-text-primary">{{ stats?.totalQuestionsAnswered || 0 }}</p>
+              <p class="mt-1 text-xs text-text-secondary">已提交答案</p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="group flex min-h-[112px] w-full items-center gap-3 p-5 text-left transition-colors hover:bg-surface-muted/45"
+            @click="$router.push('/wrong-answers')"
+          >
+            <span class="icon-box bg-danger/10 text-danger transition-colors group-hover:bg-danger group-hover:text-white">
+              <Icon icon="heroicons:exclamation-triangle" class="text-xl" />
+            </span>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2">
+                <p class="section-label">待复习错题</p>
+                <span v-if="(stats?.pendingReviewCount || 0) > 0" class="h-2 w-2 rounded-full bg-danger" />
+              </div>
+              <p class="mt-1 text-2xl font-semibold tabular-nums" :class="pendingClass">{{ stats?.pendingReviewCount || 0 }}</p>
+              <p class="mt-1 text-xs text-text-secondary">进入错题本</p>
+            </div>
+            <Icon icon="heroicons:chevron-right" class="text-lg text-text-secondary/45 transition-colors group-hover:text-danger" />
+          </button>
         </div>
       </div>
-
-      <button
-        type="button"
-        class="metric-card relative overflow-hidden text-left"
-        @click="$router.push('/wrong-answers')"
-      >
-        <div class="absolute inset-x-0 top-0 h-1" :class="pendingBarClass" />
-        <div class="flex h-full flex-col justify-between gap-5">
-          <div class="flex items-center justify-between gap-3">
-            <p class="section-label">待复习错题</p>
-            <div class="icon-box bg-danger/10 text-danger"><Icon icon="heroicons:exclamation-triangle" class="text-xl" /></div>
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <p class="text-3xl font-semibold" :class="pendingClass">{{ stats?.pendingReviewCount || 0 }}</p>
-              <span v-if="(stats?.pendingReviewCount || 0) > 0" class="flex h-2 w-2">
-                <span class="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-danger opacity-75" />
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-danger" />
-              </span>
-            </div>
-            <p class="mt-1 text-xs text-text-secondary">点击进入错题本</p>
-          </div>
-        </div>
-      </button>
-    </div>
+    </section>
 
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <section class="surface-panel overflow-hidden lg:col-span-2">
@@ -281,29 +314,42 @@ const correctCount = computed(() => {
   return Math.round(stats.value.totalQuestionsAnswered * stats.value.correctRate / 100)
 })
 
+const correctRateValue = computed(() => {
+  const rate = stats.value?.correctRate || 0
+  return Math.min(Math.max(Math.round(rate), 0), 100)
+})
+
+const correctRateSummary = computed(() => {
+  const r = correctRateValue.value
+  if (!stats.value?.totalQuestionsAnswered) return '完成一组练习后，这里会显示阅读表现'
+  if (r >= 85) return '表现很稳，可以继续提高速度'
+  if (r >= 70) return '基础不错，适合结合错题复盘'
+  if (r >= 55) return '正在建立手感，建议优先查漏'
+  return '先把错因收拢，节奏会更清晰'
+})
+
 const correctRateClass = computed(() => {
-  const r = stats.value?.correctRate || 0
+  const r = correctRateValue.value
   if (r >= 80) return 'text-success'
   if (r >= 60) return 'text-primary'
   return 'text-danger'
 })
 
 const correctRateBarClass = computed(() => {
-  const r = stats.value?.correctRate || 0
+  const r = correctRateValue.value
   if (r >= 80) return 'bg-success'
   if (r >= 60) return 'bg-primary'
   return 'bg-danger'
 })
 
 const correctRateRingClass = computed(() => {
-  const r = stats.value?.correctRate || 0
+  const r = correctRateValue.value
   if (r >= 80) return 'text-success'
   if (r >= 60) return 'text-primary'
   return 'text-danger'
 })
 
 const pendingClass = computed(() => (stats.value?.pendingReviewCount || 0) > 0 ? 'text-danger' : 'text-text-secondary')
-const pendingBarClass = computed(() => (stats.value?.pendingReviewCount || 0) > 0 ? 'bg-danger' : 'bg-slate-300')
 
 function articleScoreColor(score: number) {
   if (score >= 80) return 'text-success'
