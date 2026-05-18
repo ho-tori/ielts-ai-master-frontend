@@ -124,7 +124,7 @@ function closePopup() {
   <div class="bg-surface p-6 flex flex-col h-full overflow-y-auto" @click="closePopup">
     <!-- 标题栏：文章标题 + 清除高亮按钮 -->
     <div class="flex items-center justify-between mb-5">
-      <h3 class="text-2xl font-bold text-text-primary leading-tight">
+      <h3 class="reading-original-english text-2xl font-bold text-text-primary leading-tight">
         {{ title }}
       </h3>
       <button
@@ -147,7 +147,7 @@ function closePopup() {
         :data-para="paragraph.paragraphNumber"
         class="paragraph-block mb-4"
       >
-        <p class="text-text-primary">
+        <p class="reading-original-english text-text-primary">
           <template v-for="(seg, idx) in getSegments(paragraph.content, paragraph.paragraphNumber)" :key="idx">
             <mark
               v-if="seg.highlighted"
@@ -186,3 +186,9 @@ function closePopup() {
     </Teleport>
   </div>
 </template>
+
+<style scoped>
+.reading-original-english {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+</style>

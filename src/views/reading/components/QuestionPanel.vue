@@ -17,7 +17,7 @@
           'pb-4 border-b border-border/70 last:border-0 scroll-mt-24 transition-all'
         ]"
       >
-        <p class="font-medium text-text-primary mb-3">
+        <p class="reading-answer-english font-medium text-text-primary mb-3">
           <span class="text-primary">{{ idx + 1 }}.</span> {{ q.stem }}
         </p>
         <div class="space-y-2">
@@ -28,6 +28,7 @@
             :variant="getButtonVariant(q.id, opt, q.correctAnswer)"
             block
             :disabled="showResults"
+            class="reading-answer-english"
             @click="selectAnswer(q.id, opt)"
           >
             {{ opt }}
@@ -40,6 +41,7 @@
             :variant="getButtonVariant(q.id, opt.label, q.correctAnswer)"
             block
             :disabled="showResults"
+            class="reading-answer-english"
             @click="selectAnswer(q.id, opt.label)"
           >
             {{ opt.label }}. {{ opt.content }}
@@ -52,6 +54,7 @@
             :variant="getButtonVariant(q.id, opt.label, q.correctAnswer)"
             block
             :disabled="showResults"
+            class="reading-answer-english"
             @click="selectAnswer(q.id, opt.label)"
           >
             {{ opt.label }}. {{ opt.content }}
@@ -225,3 +228,9 @@ function getButtonVariant(questionId: number, option: string, correctAnswer?: st
   return option === userAnswer ? 'tertiary' : 'secondary'
 }
 </script>
+
+<style scoped>
+.reading-answer-english {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+</style>

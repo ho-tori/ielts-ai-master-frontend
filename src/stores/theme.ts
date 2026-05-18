@@ -1,16 +1,16 @@
 import { defineStore } from 'pinia'
 
-export type ThemeName = 'light' | 'ocean' | 'mono'
+export type ThemeName = 'light' | 'ocean' | 'mono' | 'claude'
 
 interface State {
   currentTheme: ThemeName
 }
 
 const THEME_STORAGE_KEY = 'app-theme'
-const THEME_SEQUENCE: ThemeName[] = ['light', 'ocean', 'mono']
+const THEME_SEQUENCE: ThemeName[] = ['light', 'ocean', 'mono', 'claude']
 
 function isThemeName(value: string | null): value is ThemeName {
-  return value === 'light' || value === 'ocean' || value === 'mono'
+  return value === 'light' || value === 'ocean' || value === 'mono' || value === 'claude'
 }
 
 export const useThemeStore = defineStore('theme', {

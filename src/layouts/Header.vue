@@ -43,6 +43,7 @@ const streakDays = ref(0)
 const themeLabel = computed(() => {
   if (themeStore.currentTheme === 'light') return 'Ocean'
   if (themeStore.currentTheme === 'ocean') return '黑白橙'
+  if (themeStore.currentTheme === 'mono') return 'Claude'
   return 'Light'
 })
 
