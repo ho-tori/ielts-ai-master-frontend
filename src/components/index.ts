@@ -8,6 +8,7 @@ export { default as BaseSelect } from './common/BaseSelect.vue'
 export { default as Empty } from './common/Empty.vue'
 export { default as ErrorState } from './common/ErrorState.vue'
 export { default as Loading } from './common/Loading.vue'
+export { default as PageHeader } from './common/PageHeader.vue'
 
 // AI Components
 export { default as ExplanationCard } from './ai/ExplanationCard.vue'

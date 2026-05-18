@@ -8,7 +8,7 @@
       :required="required"
       :minlength="minlength"
       :autocomplete="autocomplete"
-      class="w-full px-4 py-3 rounded-lg border border-border bg-surface focus:border-primary focus:ring-2 focus:ring-primary/20 text-text-primary placeholder:text-text-secondary/70 transition-all outline-none"
+      class="w-full min-h-11 rounded-lg border border-border/80 bg-surface-elevated px-4 py-3 text-text-primary shadow-[0_1px_2px_rgb(15_23_42_/_0.03)] outline-none transition-all placeholder:text-text-secondary/55 hover:border-primary/30 focus:border-primary focus:ring-2 focus:ring-primary/20"
       @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value.trim())"
     />
     <button 

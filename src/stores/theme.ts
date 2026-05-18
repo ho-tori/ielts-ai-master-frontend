@@ -1,12 +1,17 @@
 import { defineStore } from 'pinia'
 
-export type ThemeName = 'light' | 'ocean'
+export type ThemeName = 'light' | 'ocean' | 'mono'
 
 interface State {
   currentTheme: ThemeName
 }
 
 const THEME_STORAGE_KEY = 'app-theme'
+const THEME_SEQUENCE: ThemeName[] = ['light', 'ocean', 'mono']
+
+function isThemeName(value: string | null): value is ThemeName {
+  return value === 'light' || value === 'ocean' || value === 'mono'
+}
 
 export const useThemeStore = defineStore('theme', {
   state: (): State => ({
@@ -14,13 +19,13 @@ export const useThemeStore = defineStore('theme', {
   }),
   actions: {
     initTheme() {
-      const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) as ThemeName | null
-      const nextTheme: ThemeName = savedTheme === 'ocean' ? 'ocean' : 'light'
-      this.applyTheme(nextTheme)
+      const savedTheme = localStorage.getItem(THEME_STORAGE_KEY)
+      this.applyTheme(isThemeName(savedTheme) ? savedTheme : 'light')
     },
 
     toggleTheme() {
-      const nextTheme: ThemeName = this.currentTheme === 'light' ? 'ocean' : 'light'
+      const currentIndex = THEME_SEQUENCE.indexOf(this.currentTheme)
+      const nextTheme = THEME_SEQUENCE[(currentIndex + 1) % THEME_SEQUENCE.length] ?? 'light'
       this.applyTheme(nextTheme)
     },
 

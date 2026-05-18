@@ -14,11 +14,11 @@
         :id="`question-item-${q.id}`"
         :key="q.id"
         :class="[
-          'pb-4 border-b border-slate-100 last:border-0 scroll-mt-24 transition-all'
+          'pb-4 border-b border-border/70 last:border-0 scroll-mt-24 transition-all'
         ]"
       >
-        <p class="font-medium text-slate-800 mb-3">
-          <span class="text-indigo-600">{{ idx + 1 }}.</span> {{ q.stem }}
+        <p class="font-medium text-text-primary mb-3">
+          <span class="text-primary">{{ idx + 1 }}.</span> {{ q.stem }}
         </p>
         <div class="space-y-2">
           <BaseButton
@@ -31,7 +31,7 @@
             @click="selectAnswer(q.id, opt)"
           >
             {{ opt }}
-            <span v-if="showResults && opt === q.correctAnswer" class="ml-2">✓</span>
+            <Icon v-if="showResults && opt === q.correctAnswer" icon="heroicons:check" class="ml-2" />
           </BaseButton>
           <BaseButton
             v-else-if="q.questionTypeCode === 'match'"
@@ -43,7 +43,7 @@
             @click="selectAnswer(q.id, opt.label)"
           >
             {{ opt.label }}. {{ opt.content }}
-            <span v-if="showResults && opt.label === q.correctAnswer" class="ml-2">✓</span>
+            <Icon v-if="showResults && opt.label === q.correctAnswer" icon="heroicons:check" class="ml-2" />
           </BaseButton>
           <BaseButton
             v-else
@@ -55,10 +55,10 @@
             @click="selectAnswer(q.id, opt.label)"
           >
             {{ opt.label }}. {{ opt.content }}
-            <span v-if="showResults && opt.label === q.correctAnswer" class="ml-2">✓</span>
+            <Icon v-if="showResults && opt.label === q.correctAnswer" icon="heroicons:check" class="ml-2" />
           </BaseButton>
         </div>
-        <div v-if="showResults && q.analysis" class="mt-2 p-2 bg-slate-50 text-sm text-slate-600">
+        <div v-if="showResults && q.analysis" class="mt-2 p-3 rounded-lg bg-surface-muted text-sm text-text-secondary">
           {{ q.analysis }}
         </div>
       </div>
@@ -67,7 +67,7 @@
       <div v-if="showResults" class="space-y-2">
         <div class="p-3 text-center" :class="scoreBgClass">
           <p class="text-lg font-bold" :class="scoreClass">
-            {{ score >= 60 ? '🎉 恭喜通过！' : '💪 继续加油！' }}
+            {{ score >= 60 ? '恭喜通过！' : '继续加油！' }}
           </p>
           <p class="text-sm text-text-secondary">正确率: {{ score }}%</p>
         </div>
@@ -95,6 +95,7 @@
 import { ref, computed, watch, nextTick } from 'vue'
 import type { Question, QuestionOption } from '../../../types/article'
 import { BaseButton } from '@/components'
+import { Icon } from '@iconify/vue'
 
 const props = defineProps<{
   questions: Question[]

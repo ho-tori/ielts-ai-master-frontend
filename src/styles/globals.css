@@ -1,39 +1,66 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* 全局样式 */
-
 :root,
 html[data-theme='light'] {
-  --color-primary: 79 70 229;
-  --color-primary-hover: 67 56 202;
+  --color-primary: 37 99 235;
+  --color-primary-hover: 30 64 175;
+  --color-accent: 13 148 136;
   --color-text-primary: 15 23 42;
-  --color-text-secondary: 71 85 105;
+  --color-text-secondary: 82 95 112;
   --color-surface: 255 255 255;
-  --color-surface-muted: 241 245 249;
-  --color-border: 226 232 240;
+  --color-surface-elevated: 255 255 255;
+  --color-surface-muted: 244 247 251;
+  --color-border: 209 218 230;
   --color-danger: 220 38 38;
-  --color-success: 22 163 74;
-  --color-selection-bg: 199 210 254;
+  --color-success: 5 150 105;
+  --color-warning: 217 119 6;
+  --color-info: 79 70 229;
+  --color-selection-bg: 191 219 254;
+  --color-page-start: 248 250 252;
+  --color-page-end: 238 242 247;
 }
 
 html[data-theme='ocean'] {
-  --color-primary: 3 105 161;
-  --color-primary-hover: 7 89 133;
-  --color-text-primary: 12 74 110;
-  --color-text-secondary: 71 85 105;
-  --color-surface: 255 255 255;
-  --color-surface-muted: 241 245 249;
-  --color-border: 226 232 240;
+  --color-primary: 8 145 178;
+  --color-primary-hover: 14 116 144;
+  --color-accent: 79 70 229;
+  --color-text-primary: 12 37 55;
+  --color-text-secondary: 71 88 105;
+  --color-surface: 252 254 255;
+  --color-surface-elevated: 255 255 255;
+  --color-surface-muted: 240 247 250;
+  --color-border: 198 215 226;
   --color-danger: 225 29 72;
   --color-success: 5 150 105;
+  --color-warning: 202 138 4;
+  --color-info: 37 99 235;
   --color-selection-bg: 125 211 252;
+  --color-page-start: 248 253 255;
+  --color-page-end: 236 247 251;
+}
+
+html[data-theme='mono'] {
+  --color-primary: 194 65 12;
+  --color-primary-hover: 154 52 18;
+  --color-accent: 24 24 27;
+  --color-text-primary: 17 24 39;
+  --color-text-secondary: 82 82 91;
+  --color-surface: 255 255 255;
+  --color-surface-elevated: 255 255 255;
+  --color-surface-muted: 245 245 244;
+  --color-border: 212 212 216;
+  --color-danger: 220 38 38;
+  --color-success: 5 150 105;
+  --color-warning: 217 119 6;
+  --color-info: 63 63 70;
+  --color-selection-bg: 254 215 170;
+  --color-page-start: 250 250 249;
+  --color-page-end: 228 228 231;
 }
 
 body {
   color: rgb(var(--color-text-primary));
-  background: rgb(var(--color-surface-muted));
+  background:
+    linear-gradient(180deg, rgb(var(--color-page-start)) 0%, rgb(var(--color-surface-muted)) 46%, rgb(var(--color-page-end)) 100%);
+  min-width: 320px;
 }
 
 /* 滚动条美化 */
@@ -66,10 +93,36 @@ a {
   @apply text-primary hover:text-primary-hover transition-colors;
 }
 
-/* 输入框焦点样式 */
-input:focus,
-select:focus,
-textarea:focus {
-  @apply ring-2 ring-primary/20;
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
 }
 
+input,
+select,
+textarea,
+button {
+  letter-spacing: 0;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  @apply outline-none ring-2 ring-primary/35 ring-offset-2 ring-offset-surface;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,9 +1,13 @@
 <template>
-  <div class="space-y-6">
-    <div class="flex items-center gap-3">
-      <BaseButton variant="secondary" size="sm" @click="$router.back()">← 返回</BaseButton>
-      <h2 class="text-xl font-bold text-text-primary">错题详情</h2>
-    </div>
+  <div class="app-page">
+    <PageHeader title="错题详情" description="复盘题目、错因分析和正确思维路径。">
+      <template #actions>
+        <BaseButton variant="secondary" size="sm" @click="$router.back()">
+          <Icon icon="heroicons:arrow-left" />
+          返回
+        </BaseButton>
+      </template>
+    </PageHeader>
 
     <Loading v-if="loading" />
     <ErrorState v-else-if="error" :message="error" />
@@ -30,7 +34,7 @@
         <BaseCard>
           <template #header>
             <div class="flex items-center gap-2">
-              <span class="text-danger text-lg">⚠</span>
+              <Icon icon="heroicons:exclamation-triangle" class="text-danger text-lg" />
               <h3 class="font-bold text-text-primary">AI 错因分析</h3>
             </div>
           </template>
@@ -40,7 +44,7 @@
         <BaseCard>
           <template #header>
             <div class="flex items-center gap-2">
-              <span class="text-success text-lg">✓</span>
+              <Icon icon="heroicons:check-circle" class="text-success text-lg" />
               <h3 class="font-bold text-text-primary">正确思维路径</h3>
             </div>
           </template>
@@ -59,7 +63,7 @@
               <div class="text-sm text-text-secondary">
                 <template v-if="point.type === '同义替换对'">
                   <span class="text-text-primary font-medium">{{ point.sourceWord }}</span>
-                  <span class="mx-1">→</span>
+                  <Icon icon="heroicons:arrow-right" class="mx-1 inline text-primary" />
                   <span class="text-text-primary font-medium">{{ point.targetWord }}</span>
                   <span v-if="point.note" class="ml-2">（{{ point.note }}）</span>
                 </template>
@@ -99,9 +103,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { BaseCard, BaseButton, Loading, ErrorState } from '@/components'
+import { BaseCard, BaseButton, Loading, ErrorState, PageHeader } from '@/components'
 import ErrorTypeBadge from './components/ErrorTypeBadge.vue'
 import { apiGetAnalysis, apiAnalyzeWrongAnswer } from '@/api/wrongAnswer'
+import { Icon } from '@iconify/vue'
 import type { AnalysisDetail } from '@/types/wrongAnswer'
 
 const route = useRoute()

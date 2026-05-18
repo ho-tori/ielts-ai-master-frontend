@@ -33,11 +33,8 @@ function goAccount() {
 
 <template>
   <!-- 左侧侧边栏 - 快捷功能 -->
-  <aside class="w-20 bg-surface border-r border-border flex flex-col items-center py-8 shrink-0">
-    
-    <!-- 菜单项容器 -->
-    <div class="space-y-8">
-      <!-- 循环渲染菜单按钮 -->
+  <aside class="hidden w-[88px] shrink-0 border-r border-border/60 bg-surface/90 px-4 py-5 backdrop-blur md:flex md:flex-col md:items-center">
+    <div class="flex flex-col gap-2">
       <SidebarNavItem
         v-for="item in visibleMenuItems"
         :key="item.path"
@@ -48,7 +45,6 @@ function goAccount() {
       />
     </div>
 
-    <!-- 底部设置按钮 -->
     <div class="mt-auto">
       <SidebarNavItem 
         @click="goAccount" 
@@ -60,7 +56,3 @@ function goAccount() {
     </div>
   </aside>
 </template>
-
-<style scoped>
-/* 如果有特殊的样式可以在这里写 */
-</style>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { Icon } from '@iconify/vue'
 import type { Paragraph } from '@/types/article'
 
 interface HighlightRange {
@@ -146,7 +147,7 @@ function closePopup() {
         :data-para="paragraph.paragraphNumber"
         class="paragraph-block mb-4"
       >
-        <p class="text-slate-800">
+        <p class="text-text-primary">
           <template v-for="(seg, idx) in getSegments(paragraph.content, paragraph.paragraphNumber)" :key="idx">
             <mark
               v-if="seg.highlighted"
@@ -156,15 +157,16 @@ function closePopup() {
             >{{ seg.text }}</mark>
             <span v-else>{{ seg.text }}</span>
           </template>
-          <span
+          <Icon
             v-if="noteParagraphs.has(paragraph.paragraphNumber)"
-            class="ml-1 text-xs text-primary cursor-help"
+            icon="heroicons:pencil-square"
+            class="ml-1 inline text-primary cursor-help"
             title="此段落有笔记"
-          >📝</span>
+          />
         </p>
         <p
           v-if="paragraph.translation && visibleTranslations[paragraph.paragraphNumber]"
-          class="text-slate-500 text-sm mt-1"
+          class="text-text-secondary text-sm mt-1"
         >{{ paragraph.translation }}</p>
       </div>
     </div>
@@ -173,7 +175,7 @@ function closePopup() {
     <Teleport to="body">
       <div
         v-if="clickedHighlight"
-        class="fixed z-50 bg-white rounded-lg shadow-lg border border-border px-3 py-2 flex items-center gap-2 text-sm"
+        class="fixed z-50 bg-surface rounded-lg shadow-lg border border-border px-3 py-2 flex items-center gap-2 text-sm"
         :style="{ top: clickedHighlight.y + 'px', left: clickedHighlight.x + 'px', transform: 'translateX(-50%)' }"
       >
         <button

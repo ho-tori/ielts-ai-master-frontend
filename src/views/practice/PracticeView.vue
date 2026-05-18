@@ -6,6 +6,8 @@ import ExerciseCard from './components/ExerciseCard.vue'
 import EmptyState from './components/EmptyState.vue'
 import { getArticleList, apiGetProgress } from '@/api/article'
 import { useUserStore } from '@/stores/user'
+import { BaseButton, PageHeader } from '@/components'
+import { Icon } from '@iconify/vue'
 import type { ArticleListItem } from '@/types/article'
 
 const router = useRouter()
@@ -93,19 +95,18 @@ const getArticleProgress = (articleId: number) => {
 </script>
 
 <template>
-  <div class="space-y-6">
-    <div class="mb-8 flex items-center justify-between">
-      <div>
-        <h1 class="text-3xl font-bold text-text-primary mb-2">练习中心</h1>
-        <p class="text-text-secondary">搜索并练习IELTS阅读考试题目</p>
-      </div>
-      <button
-        @click="router.push('/ielts-intro')"
-        class="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 text-white font-medium transition-colors"
-      >
-        <span>雅思考试流程指南</span>
-      </button>
-    </div>
+  <div class="app-page">
+    <PageHeader
+      title="练习中心"
+      description="按考试类型、难度和话题筛选阅读文章，快速进入练习。"
+    >
+      <template #actions>
+        <BaseButton @click="router.push('/ielts-intro')">
+          <Icon icon="heroicons:map" />
+          雅思流程
+        </BaseButton>
+      </template>
+    </PageHeader>
 
     <SearchBar
       v-model="searchKeyword"
@@ -116,10 +117,12 @@ const getArticleProgress = (articleId: number) => {
       @update:category="handleCategoryChange"
     />
 
-    <div class="mb-6">
-      <p class="text-text-secondary">
+    <div class="surface-panel-muted flex items-center justify-between gap-3 px-4 py-3">
+      <p class="flex items-center gap-2 text-sm text-text-secondary">
+        <Icon icon="heroicons:document-magnifying-glass" class="text-primary" />
         找到 <span class="font-semibold text-text-primary">{{ filteredArticles.length }}</span> 篇文章
       </p>
+      <span class="hidden text-xs text-text-secondary sm:inline">筛选结果会随条件实时更新</span>
     </div>
 
     <div v-if="loading" class="flex justify-center py-12">
@@ -130,7 +133,7 @@ const getArticleProgress = (articleId: number) => {
       <p class="text-danger text-sm">{{ error }}</p>
     </div>
 
-    <div v-else-if="filteredArticles.length > 0" class="space-y-4">
+    <div v-else-if="filteredArticles.length > 0" class="grid grid-cols-1 gap-4 xl:grid-cols-2">
       <ExerciseCard
         v-for="article in filteredArticles"
         :key="article.id"

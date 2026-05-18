@@ -1,42 +1,41 @@
 <template>
-  <div class="group p-5 bg-surface border border-border/70 rounded-2xl hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10 transition-all cursor-pointer"
-       @click="$emit('start', article.id)">
-    <div class="flex items-start justify-between">
-      <div class="flex-1">
-        <!-- Tags -->
-        <div class="flex items-center space-x-3 mb-3">
-          <span class="px-2 py-0.5 text-[10px] font-black rounded uppercase bg-primary/10 text-primary">
+  <div class="interactive-row group flex cursor-pointer flex-col overflow-hidden p-0" @click="$emit('start', article.id)">
+    <div class="flex flex-1 flex-col gap-4 p-5">
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="rounded-md bg-primary/10 px-2 py-1 text-[11px] font-semibold text-primary">
             {{ article.examType }}
           </span>
-          <span class="flex items-center text-[11px] font-bold" :class="getDifficultyColor(article.difficulty)">
+          <span class="flex items-center rounded-md bg-surface-muted px-2 py-1 text-[11px] font-semibold" :class="getDifficultyColor(article.difficulty)">
             {{ getDifficultyLabel(article.difficulty) }}
           </span>
           <span
             v-for="topic in (article.topics || [])"
             :key="topic.id"
-            class="px-2 py-0.5 bg-surface-muted text-text-secondary text-[10px] rounded"
+            class="rounded-md bg-surface-muted px-2 py-1 text-[11px] text-text-secondary"
           >
             {{ topic.name }}
           </span>
         </div>
 
-        <!-- Title -->
-        <h4 class="text-lg font-bold text-text-primary group-hover:text-primary transition-colors line-clamp-2 mb-2">
+        <h4 class="line-clamp-2 min-h-[3.25rem] text-lg font-semibold leading-7 text-text-primary transition-colors group-hover:text-primary">
           {{ article.title }}
         </h4>
 
-        <!-- Stats -->
-        <div class="flex items-center space-x-6 text-xs text-text-secondary/70">
-          <span>{{ article.questions?.length || 0 }} 题</span>
-          <span v-if="article.paragraphs?.length">{{ article.paragraphs.length }} 段落</span>
+        <div class="mt-auto flex flex-wrap items-center gap-4 text-xs text-text-secondary">
+          <span class="inline-flex items-center gap-1">
+            <Icon icon="heroicons:list-bullet" />{{ article.questions?.length || 0 }} 题
+          </span>
+          <span v-if="article.paragraphs?.length" class="inline-flex items-center gap-1">
+            <Icon icon="heroicons:document-text" />{{ article.paragraphs.length }} 段落
+          </span>
         </div>
-      </div>
+    </div>
 
-      <!-- Right: status + button -->
-      <div class="flex flex-col items-end space-y-3 ml-4">
+    <div class="flex flex-col gap-3 border-t border-border/45 bg-surface-muted/35 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <div class="min-w-0 flex-1">
         <span
           :class="[
-            'px-3 py-1 text-[10px] font-bold rounded-full',
+            'inline-flex rounded-full px-2.5 py-1 text-xs font-medium',
             progress?.completed
               ? 'bg-success/15 text-success'
               : progress
@@ -46,16 +45,23 @@
         >
           {{ progress?.completed ? '已完成' : progress ? `已答${progress.answeredQuestions}/${progress.totalQuestions}题` : '未开始' }}
         </span>
-        <BaseButton variant="primary" size="sm">
-          {{ progress ? '继续练习' : '开始练习' }}
-        </BaseButton>
+        <div v-if="progress" class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-surface">
+          <div
+            class="h-full rounded-full bg-primary transition-all duration-500"
+            :style="{ width: Math.min(100, Math.round(progress.answeredQuestions * 100 / Math.max(progress.totalQuestions, 1))) + '%' }"
+          />
+        </div>
       </div>
+      <BaseButton variant="primary" size="sm">
+        {{ progress ? '继续练习' : '开始练习' }}
+      </BaseButton>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { BaseButton } from '@/components'
+import { Icon } from '@iconify/vue'
 import type { ArticleListItem } from '@/types/article'
 
 defineProps<{

@@ -8,6 +8,7 @@ import { getArticleDetail, submitAnswer } from '@/api/article'
 import { apiGetNotes, apiSaveHighlight, apiSaveNote, apiClearHighlights, apiDeleteNote } from '@/api/note'
 import { useUserStore } from '@/stores/user'
 import { BaseButton } from '@/components'
+import { Icon } from '@iconify/vue'
 import type { RecentArticle, Article } from '../../types/article'
 
 // 路由与全局状态
@@ -503,7 +504,7 @@ watch(
 
     <!-- 错误态 -->
     <div v-else-if="error" class="mb-4 p-4 bg-danger/10 border border-danger/30 rounded-lg">
-      <p class="text-danger text-sm">❌ {{ error }}</p>
+      <p class="text-danger text-sm">{{ error }}</p>
     </div>
 
     <div v-else-if="!currentArticle && error" class="flex items-center justify-center h-full">
@@ -516,7 +517,9 @@ watch(
     <!-- 空状态：没有加载文章 -->
     <div v-else-if="!currentArticle" class="flex items-center justify-center h-full">
       <div class="text-center max-w-md">
-        <div class="text-6xl mb-4">📖</div>
+        <div class="icon-box mx-auto mb-4 h-14 w-14 bg-primary/10 text-primary">
+          <Icon icon="heroicons:book-open" class="text-3xl" />
+        </div>
         <h3 class="text-xl font-bold text-text-primary mb-2">准备开始阅读练习</h3>
         <p class="text-text-secondary text-sm mb-6">
           从练习中心选择一篇文章开始答题，AI 会帮你分析错题、提取生词、生成专项训练。
@@ -561,7 +564,7 @@ watch(
         <!-- 选中文字时的浮动高亮按钮 -->
         <div
           v-if="selectionContext.text"
-          class="fixed z-40 bg-white rounded-lg shadow-lg border border-border px-2 py-1.5 flex items-center gap-1"
+          class="fixed z-40 bg-surface rounded-lg shadow-lg border border-border px-2 py-1.5 flex items-center gap-1"
           :style="{ top: highlightToolbarY + 'px', left: highlightToolbarX + 'px' }"
         >
           <button
@@ -627,7 +630,7 @@ watch(
           to="/wrong-answers"
           class="inline-flex items-center gap-2 px-4 py-3 bg-primary text-white rounded-lg shadow-lg hover:bg-primary-hover transition-colors text-sm font-medium"
         >
-          <span>📊</span>
+          <Icon icon="heroicons:exclamation-triangle" />
           <span>查看错题本 ({{ wrongQuestionIds.length }}道错题)</span>
         </router-link>
       </div>

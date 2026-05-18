@@ -1,31 +1,37 @@
 <template>
-  <div class="space-y-6">
-    <div class="flex items-center justify-between">
-      <h2 class="text-2xl font-bold text-text-primary">智能生词本</h2>
-      <BaseButton
-        variant="primary"
-        :loading="generating"
-        :disabled="generating"
-        @click="generateVocab"
-      >
-        {{ generating ? 'AI分析中...' : '生成生词本' }}
-      </BaseButton>
-    </div>
+  <div class="app-page">
+    <PageHeader
+      title="智能生词本"
+      description="按固定语义标签整理错题中的同义替换和高频表达。"
+    >
+      <template #actions>
+        <BaseButton
+          variant="primary"
+          :loading="generating"
+          :disabled="generating"
+          @click="generateVocab"
+        >
+          <Icon icon="heroicons:sparkles" />
+          {{ generating ? 'AI分析中...' : '生成生词本' }}
+        </BaseButton>
+      </template>
+    </PageHeader>
 
-    <!-- Cluster Tabs -->
-    <div v-if="clusters.length > 0" class="flex flex-wrap gap-2">
-      <BaseButton
-        :variant="selectedCluster === '' ? 'primary' : 'secondary'"
-        size="sm"
-        @click="filterByCluster('')"
-      >全部 ({{ totalCount }})</BaseButton>
-      <BaseButton
-        v-for="c in clusters"
-        :key="c.name"
-        :variant="selectedCluster === c.name ? 'primary' : 'secondary'"
-        size="sm"
-        @click="filterByCluster(c.name)"
-      >{{ c.name }} ({{ c.count }})</BaseButton>
+    <div v-if="clusters.length > 0" class="surface-panel-muted overflow-x-auto p-2">
+      <div class="flex min-w-max items-center gap-2">
+        <BaseButton
+          :variant="selectedCluster === '' ? 'primary' : 'ghost'"
+          size="sm"
+          @click="filterByCluster('')"
+        >全部 {{ totalCount }}</BaseButton>
+        <BaseButton
+          v-for="c in clusters"
+          :key="c.name"
+          :variant="selectedCluster === c.name ? 'primary' : 'ghost'"
+          size="sm"
+          @click="filterByCluster(c.name)"
+        >{{ c.name }} {{ c.count }}</BaseButton>
+      </div>
     </div>
 
     <!-- Loading -->
@@ -37,7 +43,7 @@
     </BaseCard>
 
     <!-- Vocabulary Grid -->
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div v-else class="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <VocabularyItemCard
         v-for="item in vocabList"
         :key="item.id"
@@ -50,7 +56,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { BaseCard, BaseButton, Loading, Empty } from '@/components'
+import { BaseCard, BaseButton, Loading, Empty, PageHeader } from '@/components'
+import { Icon } from '@iconify/vue'
 import VocabularyItemCard from './components/VocabularyItemCard.vue'
 import { apiGenerateVocabulary, apiGetGenerationStatus, apiGetVocabularyList, apiGetClusters, apiDeleteVocabulary } from '@/api/vocabulary'
 import type { VocabularyItem, ClusterInfo } from '@/types/vocabulary'

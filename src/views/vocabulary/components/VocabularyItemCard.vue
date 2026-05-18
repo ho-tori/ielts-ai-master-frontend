@@ -1,40 +1,36 @@
 <template>
   <BaseCard>
-    <div class="flex items-start justify-between gap-3">
-      <div class="flex-1 min-w-0">
-        <div class="flex items-center gap-2 mb-2">
-          <span class="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">{{ item.semanticCluster }}</span>
-        </div>
-
-        <!-- Synonym Pair -->
-        <div class="flex items-center gap-2 mb-3 py-2 px-3 bg-surface-muted rounded-lg">
-          <span class="text-text-primary font-bold text-base">{{ item.word }}</span>
-          <span class="text-primary text-lg">→</span>
-          <span class="text-primary font-bold text-base">{{ item.questionReplacement }}</span>
-        </div>
-
-        <!-- Source sentence -->
-        <div v-if="item.sourceSentence" class="p-2 bg-surface-muted rounded text-sm text-text-secondary italic mb-2">
-          {{ item.sourceSentence }}
-        </div>
-
-        <!-- Synonyms -->
-        <div v-if="item.synonyms && item.synonyms.length > 0" class="flex flex-wrap gap-1 mb-2">
-          <span class="text-xs text-text-secondary">近义词：</span>
-          <span v-for="s in item.synonyms" :key="s" class="text-xs px-1.5 py-0.5 bg-slate-100 rounded">{{ s }}</span>
-        </div>
-
-        <!-- Examples -->
-        <div v-if="item.exampleSentences && item.exampleSentences.length > 0" class="text-xs text-text-secondary space-y-1 mt-2">
-          <p v-for="(ex, idx) in item.exampleSentences" :key="idx" class="pl-2 border-l-2 border-border">{{ ex }}</p>
+    <div class="flex items-start justify-between gap-4">
+      <div class="min-w-0 flex-1">
+        <span class="inline-flex rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">{{ item.semanticCluster }}</span>
+        <div class="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-border/60 bg-surface-muted/60 px-3 py-3">
+          <span class="text-base font-semibold text-text-primary">{{ item.word }}</span>
+          <Icon icon="heroicons:arrow-right" class="text-primary" />
+          <span class="text-base font-semibold text-primary">{{ item.questionReplacement }}</span>
         </div>
       </div>
-      <BaseButton variant="ghost" size="sm" @click="$emit('delete')" title="删除">✕</BaseButton>
+      <BaseButton variant="ghost" size="sm" @click="$emit('delete')" title="删除" aria-label="删除生词">
+        <Icon icon="heroicons:trash" />
+      </BaseButton>
     </div>
 
-    <!-- Nuance Notes -->
-    <div v-if="item.nuanceNotes" class="mt-3 pt-3 border-t border-border/70">
-      <p class="text-xs text-text-secondary leading-relaxed">
+    <div v-if="item.sourceSentence" class="mt-4 rounded-lg border-l-4 border-primary/30 bg-surface-muted/55 px-3 py-3">
+      <p class="text-sm italic leading-6 text-text-secondary">
+        {{ item.sourceSentence }}
+      </p>
+    </div>
+
+    <div v-if="item.synonyms && item.synonyms.length > 0" class="mt-4 flex flex-wrap items-center gap-2">
+      <span class="text-xs font-medium text-text-secondary">近义词</span>
+      <span v-for="s in item.synonyms" :key="s" class="rounded-md bg-surface-muted px-2 py-1 text-xs text-text-secondary">{{ s }}</span>
+    </div>
+
+    <div v-if="item.exampleSentences && item.exampleSentences.length > 0" class="mt-4 space-y-2 text-xs leading-5 text-text-secondary">
+      <p v-for="(ex, idx) in item.exampleSentences" :key="idx" class="border-l-2 border-border pl-3">{{ ex }}</p>
+    </div>
+
+    <div v-if="item.nuanceNotes" class="mt-4 border-t border-border/60 pt-4">
+      <p class="text-xs leading-relaxed text-text-secondary">
         <span class="font-medium text-text-primary">近义辨析：</span>{{ item.nuanceNotes }}
       </p>
     </div>
@@ -43,6 +39,7 @@
 
 <script setup lang="ts">
 import { BaseCard, BaseButton } from '@/components'
+import { Icon } from '@iconify/vue'
 import type { VocabularyItem } from '@/types/vocabulary'
 
 defineProps<{ item: VocabularyItem }>()

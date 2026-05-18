@@ -1,9 +1,16 @@
 <template>
-  <div class="space-y-6">
-    <div class="flex items-center gap-3">
-      <BaseButton variant="secondary" size="sm" @click="$router.push('/training')">← 返回</BaseButton>
-      <h2 class="text-xl font-bold text-text-primary">{{ session?.title || '专项训练' }}</h2>
-    </div>
+  <div class="app-page">
+    <PageHeader
+      :title="session?.title || '专项训练'"
+      :description="session ? session.description : '加载训练内容中'"
+    >
+      <template #actions>
+        <BaseButton variant="secondary" size="sm" @click="$router.push('/training')">
+          <Icon icon="heroicons:arrow-left" />
+          返回
+        </BaseButton>
+      </template>
+    </PageHeader>
 
     <Loading v-if="loading" />
 
@@ -28,7 +35,7 @@
       <div v-if="!session.completed" class="space-y-6">
         <div v-for="(item, idx) in session.items" :key="idx" class="space-y-4">
           <!-- Source Sentence -->
-          <div class="p-4 bg-surface-muted rounded-lg border border-border/70">
+          <div class="surface-panel-muted p-4">
             <p class="text-xs text-text-secondary mb-1">原文句子</p>
             <p class="text-text-primary leading-relaxed">{{ item.sourceSentence }}</p>
           </div>
@@ -49,10 +56,10 @@
                 @click="selectAnswer('locate_' + idx, opt.label)"
               >
                 {{ opt.label }}. {{ opt.content }}
-                <span v-if="showResult && opt.label === item.locateQuestion.answer" class="ml-1">✓</span>
+                <Icon v-if="showResult && opt.label === item.locateQuestion.answer" icon="heroicons:check" class="ml-1" />
               </BaseButton>
             </div>
-            <div v-if="showResult && item.locateQuestion.analysis" class="mt-2 p-2 bg-slate-50 rounded text-sm text-text-secondary">
+            <div v-if="showResult && item.locateQuestion.analysis" class="mt-2 p-3 bg-surface-muted rounded-lg text-sm text-text-secondary">
               {{ item.locateQuestion.analysis }}
             </div>
           </BaseCard>
@@ -73,10 +80,10 @@
                 @click="selectAnswer('syn_' + idx, opt.label)"
               >
                 {{ opt.label }}. {{ opt.content }}
-                <span v-if="showResult && opt.label === item.synonymQuestion.answer" class="ml-1">✓</span>
+                <Icon v-if="showResult && opt.label === item.synonymQuestion.answer" icon="heroicons:check" class="ml-1" />
               </BaseButton>
             </div>
-            <div v-if="showResult" class="mt-2 p-2 bg-slate-50 rounded text-sm text-text-secondary">
+            <div v-if="showResult" class="mt-2 p-3 bg-surface-muted rounded-lg text-sm text-text-secondary">
               <p>{{ item.synonymQuestion.analysis }}</p>
               <div v-if="item.synonymQuestion.distractorDesign" class="mt-2 pt-2 border-t border-border/50">
                 <p class="text-xs text-text-secondary mb-1">干扰项设计：</p>
@@ -99,7 +106,7 @@
             </p>
           </div>
           <div v-else class="space-y-2">
-            <div class="p-3 text-center rounded-lg" :class="resultBgClass">
+            <div class="p-4 text-center rounded-lg border border-border/70" :class="resultBgClass">
               <p class="text-lg font-bold" :class="scoreClass(session.score)">
                 {{ (session.score || 0) >= 60 ? '继续加油！' : '多多练习！' }}
               </p>
@@ -115,16 +122,17 @@
       <!-- Completed View -->
       <div v-else class="space-y-4">
         <div v-for="(item, idx) in session.items" :key="idx" class="space-y-4">
-          <div class="p-4 bg-surface-muted rounded-lg border border-border/70">
+          <div class="surface-panel-muted p-4">
             <p class="text-xs text-text-secondary mb-1">原文句子</p>
             <p class="text-text-primary leading-relaxed">{{ item.sourceSentence }}</p>
           </div>
           <BaseCard v-for="(q, qIdx) in [item.locateQuestion, item.synonymQuestion]" :key="qIdx">
             <template #header>
               <div class="flex items-center gap-2">
-                <span :class="q.userAnswer === q.answer ? 'text-success' : 'text-danger'">
-                  {{ q.userAnswer === q.answer ? '✓' : '✗' }}
-                </span>
+                <Icon
+                  :icon="q.userAnswer === q.answer ? 'heroicons:check-circle' : 'heroicons:x-circle'"
+                  :class="q.userAnswer === q.answer ? 'text-success' : 'text-danger'"
+                />
                 <span class="text-sm font-bold text-text-primary">{{ qIdx === 0 ? '定位题' : '同义替换题' }}</span>
               </div>
             </template>
@@ -144,7 +152,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { BaseCard, BaseButton, Loading } from '@/components'
+import { BaseCard, BaseButton, Loading, PageHeader } from '@/components'
+import { Icon } from '@iconify/vue'
 import { apiGetTraining, apiSubmitTraining } from '@/api/training'
 import type { TrainingSession } from '@/types/training'
 
