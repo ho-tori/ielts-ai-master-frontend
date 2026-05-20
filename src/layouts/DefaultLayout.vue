@@ -27,6 +27,7 @@
         </router-link>
       </div>
     </nav>
+    <YasiMascot :lift-for-mobile-nav="!isReadingRoute" />
   </div>
 </template>
 
@@ -36,6 +37,7 @@ import { useRoute } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import Header from './Header.vue'
 import Sidebar from './Sidebar.vue'
+import YasiMascot from '@/components/mascot/YasiMascot.vue'
 
 const route = useRoute()
 const isReadingRoute = computed(() => route.path.startsWith('/reading'))
